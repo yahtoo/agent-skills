@@ -1,16 +1,16 @@
 ---
-description: Conduct a five-axis code review — correctness, readability, architecture, security, performance
+description: 执行五轴代码审查：正确性、可读性、架构、安全、性能
 ---
 
-Invoke the agent-skills:code-review-and-quality skill.
+调用 agent-skills:code-review-and-quality skill。
 
-Review the current changes (staged or recent commits) across all five axes:
+从五个维度审查当前变更（staged changes 或最近 commits）：
 
-1. **Correctness** — Does it match the spec? Edge cases handled? Tests adequate?
-2. **Readability** — Clear names? Straightforward logic? Well-organized?
-3. **Architecture** — Follows existing patterns? Clean boundaries? Right abstraction level?
-4. **Security** — Input validated? Secrets safe? Auth checked? (Use security-and-hardening skill)
-5. **Performance** — No N+1 queries? No unbounded ops? (Use performance-optimization skill)
+1. **Correctness** - 是否符合 spec？边界情况是否处理？测试是否充分？
+2. **Readability** - 命名清晰吗？逻辑直接吗？组织合理吗？
+3. **Architecture** - 是否遵循现有模式？边界清晰吗？抽象层级合适吗？
+4. **Security** - 输入是否校验？secret 是否安全？auth 是否检查？（使用 security-and-hardening skill）
+5. **Performance** - 是否存在 N+1 查询？是否有无界操作？（使用 performance-optimization skill）
 
-Categorize findings as Critical, Important, or Suggestion.
-Output a structured review with specific file:line references and fix recommendations.
+将发现归类为 Critical、Important 或 Suggestion。
+输出结构化 review，包含具体 file:line 引用和修复建议。

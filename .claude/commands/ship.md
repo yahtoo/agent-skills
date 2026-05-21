@@ -1,44 +1,44 @@
 ---
-description: Run the pre-launch checklist via parallel fan-out to specialist personas, then synthesize a go/no-go decision
+description: 通过并行分发给专业 personas 运行发布前检查，并综合 go/no-go 决策
 ---
 
-Invoke the agent-skills:shipping-and-launch skill.
+调用 agent-skills:shipping-and-launch skill。
 
-`/ship` is a **fan-out orchestrator**. It runs three specialist personas in parallel against the current change, then merges their reports into a single go/no-go decision with a rollback plan. The personas operate independently — no shared state, no ordering — which is what makes parallel execution safe and useful here.
+`/ship` 是一个 **fan-out orchestrator**。它针对当前变更并行运行三个 specialist personas，然后把它们的报告合并为一个 go/no-go 决策和 rollback plan。Personas 彼此独立运行：没有共享状态、没有顺序依赖。这正是并行执行安全且有价值的原因。
 
-## Phase A — Parallel fan-out
+## Phase A - Parallel fan-out
 
-Spawn three subagents concurrently using the Agent tool. **Issue all three Agent tool calls in a single assistant turn so they execute in parallel** — sequential calls defeat the purpose of this command.
+使用 Agent tool 并发 spawn 三个 subagents。**必须在同一个 assistant turn 中发出三个 Agent tool calls，让它们并行执行**；顺序调用会破坏这个命令的目的。
 
-In Claude Code, each call passes `subagent_type` matching the persona's `name` field:
+在 Claude Code 中，每次调用的 `subagent_type` 与 persona 的 `name` 字段匹配：
 
-1. **`code-reviewer`** — Run a five-axis review (correctness, readability, architecture, security, performance) on the staged changes or recent commits. Output the standard review template.
-2. **`security-auditor`** — Run a vulnerability and threat-model pass. Check OWASP Top 10, secrets handling, auth/authz, dependency CVEs. Output the standard audit report.
-3. **`test-engineer`** — Analyze test coverage for the change. Identify gaps in happy path, edge cases, error paths, and concurrency scenarios. Output the standard coverage analysis.
+1. **`code-reviewer`** - 对 staged changes 或 recent commits 做五轴 review（correctness、readability、architecture、security、performance）。输出标准 review template。
+2. **`security-auditor`** - 做 vulnerability 与 threat-model pass。检查 OWASP Top 10、secrets handling、auth/authz、dependency CVEs。输出标准 audit report。
+3. **`test-engineer`** - 分析变更的测试覆盖。识别 happy path、edge cases、error paths 和 concurrency scenarios 的缺口。输出标准 coverage analysis。
 
-In other harnesses without an Agent tool, invoke each persona's system prompt sequentially and treat their outputs as if returned in parallel — the merge phase still works.
+在没有 Agent tool 的其他 harness 中，按顺序调用每个 persona 的 system prompt，并把它们的输出视为并行返回；merge phase 仍然适用。
 
-Constraints (from Claude Code's subagent model):
-- Subagents cannot spawn other subagents — do not let one persona delegate to another.
-- Each subagent gets its own context window and returns only its report to this main session.
-- If you need teammates that talk to each other instead of just reporting back, use Claude Code Agent Teams and reference these personas as teammate types (see `references/orchestration-patterns.md`).
+约束（来自 Claude Code 的 subagent model）：
+- Subagents 不能 spawn 其他 subagents；不要让一个 persona 委派给另一个 persona。
+- 每个 subagent 有自己的 context window，只把报告返回给主会话。
+- 如果需要能彼此对话的 teammates，而不是只报告回来，请使用 Claude Code Agent Teams，并把这些 personas 作为 teammate types 引用（见 `references/orchestration-patterns.md`）。
 
-**Persona resolution.** If you've defined your own `code-reviewer`, `security-auditor`, or `test-engineer` in `.claude/agents/` or `~/.claude/agents/`, those take precedence over this plugin's versions — `/ship` picks up your customizations automatically. This is intentional: plugin subagents sit at the bottom of Claude Code's scope priority table, so user-level definitions win by design.
+**Persona resolution.** 如果你在 `.claude/agents/` 或 `~/.claude/agents/` 中定义了自己的 `code-reviewer`、`security-auditor` 或 `test-engineer`，它们优先于本插件版本；`/ship` 会自动使用你的自定义版本。这是有意设计：plugin subagents 位于 Claude Code scope priority table 底部，因此 user-level definitions 会胜出。
 
-## Phase B — Merge in main context
+## Phase B - Merge in main context
 
-Once all three reports are back, the main agent (not a sub-persona) synthesizes them:
+当三个报告都返回后，由主 agent（不是子 persona）进行综合：
 
-1. **Code Quality** — Aggregate Critical/Important findings from `code-reviewer` and any failing tests, lint, or build output. Resolve duplicates between reviewers.
-2. **Security** — Promote any Critical/High `security-auditor` findings to launch blockers. Cross-reference with `code-reviewer`'s security axis.
-3. **Performance** — Pull from `code-reviewer`'s performance axis; cross-check Core Web Vitals if applicable.
-4. **Accessibility** — Verify keyboard nav, screen reader support, contrast (not covered by the three personas — handle directly here, or invoke the accessibility checklist).
-5. **Infrastructure** — Env vars, migrations, monitoring, feature flags. Verify directly.
-6. **Documentation** — README, ADRs, changelog. Verify directly.
+1. **Code Quality** - 聚合 `code-reviewer` 的 Critical/Important findings，以及任何失败的 tests、lint 或 build 输出。合并重复发现。
+2. **Security** - 将任何 Critical/High `security-auditor` findings 提升为 launch blockers。与 `code-reviewer` 的 security axis 交叉核对。
+3. **Performance** - 从 `code-reviewer` 的 performance axis 提取；适用时交叉检查 Core Web Vitals。
+4. **Accessibility** - 验证 keyboard nav、screen reader support、contrast（三个 personas 不覆盖这一项；在这里直接处理，或调用 accessibility checklist）。
+5. **Infrastructure** - Env vars、migrations、monitoring、feature flags。直接验证。
+6. **Documentation** - README、ADRs、changelog。直接验证。
 
-## Phase C — Decision and rollback
+## Phase C - Decision and rollback
 
-Produce a single output:
+生成单一输出：
 
 ```markdown
 ## Ship Decision: GO | NO-GO
@@ -46,27 +46,20 @@ Produce a single output:
 ### Blockers (must fix before ship)
 - [Source persona: Critical finding + file:line]
 
-### Recommended fixes (should fix before ship)
-- [Source persona: Important finding + file:line]
+### Important Issues
+- [Source persona: Important finding + recommendation]
 
-### Acknowledged risks (shipping anyway)
-- [Risk + mitigation]
+### Test Coverage
+- [Summary from test-engineer]
 
-### Rollback plan
-- Trigger conditions: [what signals would prompt rollback]
-- Rollback procedure: [exact steps]
-- Recovery time objective: [target]
+### Security Posture
+- [Summary from security-auditor]
 
-### Specialist reports (full)
-- [code-reviewer report]
-- [security-auditor report]
-- [test-engineer report]
+### Rollback Plan
+- [Specific revert/feature-flag/infra rollback steps]
+
+### Final Recommendation
+[One paragraph decision with rationale]
 ```
 
-## Rules
-
-1. The three Phase A personas run in parallel — never sequentially.
-2. Personas do not call each other. The main agent merges in Phase B.
-3. The rollback plan is mandatory before any GO decision.
-4. If any persona returns a Critical finding, the default verdict is NO-GO unless the user explicitly accepts the risk.
-5. **Skip the fan-out only if all of the following are true:** the change touches 2 files or fewer, the diff is under 50 lines, and it does not touch auth, payments, data access, or config/env. Otherwise, default to fan-out. `/ship` is designed for production-bound changes — when the blast radius is non-trivial, run the parallel review even if the diff looks small.
+如果存在任何 blocker，决策必须是 NO-GO。

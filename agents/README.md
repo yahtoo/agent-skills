@@ -1,60 +1,60 @@
 # Agent Personas
 
-Specialist personas that play a single role with a single perspective. Each persona is a Markdown file consumed as a system prompt by your harness (Claude Code, Cursor, Copilot, etc.).
+专家 persona，只承担单一角色并采用单一视角。每个 persona 都是一个 Markdown 文件，由你的运行环境（Claude Code、Cursor、Copilot 等）作为 system prompt 使用。
 
-| Persona | Role | Best for |
+| Persona | 角色 | 最适合 |
 |---------|------|----------|
-| [code-reviewer](code-reviewer.md) | Senior Staff Engineer | Five-axis review before merge |
-| [security-auditor](security-auditor.md) | Security Engineer | Vulnerability detection, OWASP-style audit |
-| [test-engineer](test-engineer.md) | QA Engineer | Test strategy, coverage analysis, Prove-It pattern |
+| [code-reviewer](code-reviewer.md) | Senior Staff Engineer | 合并前的五轴审查 |
+| [security-auditor](security-auditor.md) | Security Engineer | 漏洞检测、OWASP 风格审计 |
+| [test-engineer](test-engineer.md) | QA Engineer | 测试策略、覆盖率分析、Prove-It pattern |
 
-## How personas relate to skills and commands
+## Personas、skills 与 commands 的关系
 
-Three layers, each with a distinct job:
+三层结构，各自职责明确：
 
-| Layer | What it is | Example | Composition role |
+| 层级 | 含义 | 示例 | 组合职责 |
 |-------|-----------|---------|------------------|
-| **Skill** | A workflow with steps and exit criteria | `code-review-and-quality` | The *how* — invoked from inside a persona or command |
-| **Persona** | A role with a perspective and an output format | `code-reviewer` | The *who* — adopts a viewpoint, produces a report |
-| **Command** | A user-facing entry point | `/review`, `/ship` | The *when* — composes personas and skills |
+| **Skill** | 带步骤和退出标准的工作流 | `code-review-and-quality` | *how*，从 persona 或 command 内部调用 |
+| **Persona** | 带视角和输出格式的角色 | `code-reviewer` | *who*，采用某个视角并产出报告 |
+| **Command** | 面向用户的入口 | `/review`, `/ship` | *when*，组合 personas 和 skills |
 
-The user (or a slash command) is the orchestrator. **Personas do not call other personas.** Skills are mandatory hops inside a persona's workflow.
+用户（或 slash command）是编排者。**Personas 不调用其他 personas。** Skills 是 persona 工作流中的强制步骤。
 
-## When to use each
+## 何时使用
 
-### Direct persona invocation
-Pick this when you want one perspective on the current change and the user is in the loop.
+### 直接调用 persona
+当你只需要从一个视角审查当前变更，并且用户参与决策时，选择这种方式。
 
-- "Review this PR" → invoke `code-reviewer` directly
-- "Are there security issues in `auth.ts`?" → invoke `security-auditor` directly
-- "What tests are missing for the checkout flow?" → invoke `test-engineer` directly
+- "Review this PR" → 直接调用 `code-reviewer`
+- "Are there security issues in `auth.ts`?" → 直接调用 `security-auditor`
+- "What tests are missing for the checkout flow?" → 直接调用 `test-engineer`
 
-### Slash command (single persona behind it)
-Pick this when there's a repeatable workflow you'd otherwise re-explain every time.
+### Slash command（背后是单个 persona）
+当某个可重复工作流每次都要重新解释时，选择这种方式。
 
-- `/review` → wraps `code-reviewer` with the project's review skill
-- `/test` → wraps `test-engineer` with TDD skill
+- `/review` → 用项目的 review skill 包装 `code-reviewer`
+- `/test` → 用 TDD skill 包装 `test-engineer`
 
-### Slash command (orchestrator — fan-out)
-Pick this only when **independent** investigations can run in parallel and produce reports that a single agent then merges.
+### Slash command（编排者，fan-out）
+只有当多个**独立**调查可以并行运行，并生成由单个 agent 汇总的报告时，才选择这种方式。
 
-- `/ship` → fans out to `code-reviewer` + `security-auditor` + `test-engineer` in parallel, then synthesizes their reports into a go/no-go decision
+- `/ship` → 并行 fan out 到 `code-reviewer` + `security-auditor` + `test-engineer`，然后把它们的报告综合为 go/no-go 决策
 
-This is the only orchestration pattern this repo endorses. See [references/orchestration-patterns.md](../references/orchestration-patterns.md) for the full pattern catalog and anti-patterns.
+这是本仓库认可的唯一编排模式。完整模式目录与反模式见 [references/orchestration-patterns.md](../references/orchestration-patterns.md)。
 
-## Decision matrix
+## 决策矩阵
 
 ```
-Is the work a single perspective on a single artifact?
-├── Yes → Direct persona invocation
-└── No  → Are the sub-tasks independent (no shared mutable state, no ordering)?
-         ├── Yes → Slash command with parallel fan-out (e.g. /ship)
-         └── No  → Sequential slash commands run by the user (/spec → /plan → /build → /test → /review)
+工作是否是对单个 artifact 的单一视角处理？
+├── 是 → 直接调用 persona
+└── 否 → 子任务是否独立（没有共享可变状态、没有顺序依赖）？
+         ├── 是 → 使用带并行 fan-out 的 slash command（例如 /ship）
+         └── 否 → 由用户顺序运行 slash commands（/spec → /plan → /build → /test → /review）
 ```
 
-## Worked example: valid orchestration
+## 示例：有效编排
 
-`/ship` is the canonical fan-out orchestrator in this repo:
+`/ship` 是本仓库中标准的 fan-out 编排者：
 
 ```
 /ship
@@ -62,59 +62,59 @@ Is the work a single perspective on a single artifact?
   ├── (parallel) security-auditor → audit report
   └── (parallel) test-engineer    → coverage report
                   ↓
-        merge phase (main agent)
+        merge phase（main agent）
                   ↓
         go/no-go decision + rollback plan
 ```
 
-Why this works:
-- Each sub-agent operates on the same diff but produces a **different perspective**
-- They have no dependencies on each other → genuine parallelism, real wall-clock savings
-- Each runs in a fresh context window → main session stays uncluttered
-- The merge step is small and benefits from full context, so it stays in the main agent
+为什么这可行：
+- 每个 sub-agent 都处理同一个 diff，但产出**不同视角**
+- 它们彼此没有依赖 → 真正并行，实际节省墙钟时间
+- 每个 sub-agent 都在新的 context window 中运行 → main session 保持清爽
+- merge step 很小，并且受益于完整上下文，因此保留在 main agent 中
 
-## Worked example: invalid orchestration (do not build this)
+## 示例：无效编排（不要构建这种模式）
 
-A `meta-orchestrator` persona whose job is "decide which other persona to call":
+一个 `meta-orchestrator` persona，其职责是“决定调用哪个其他 persona”：
 
 ```
 /work-on-pr → meta-orchestrator
-                  ↓ (decides "this needs a review")
+                  ↓（decides "this needs a review"）
               code-reviewer
-                  ↓ (returns)
-              meta-orchestrator (paraphrases result)
+                  ↓（returns）
+              meta-orchestrator（paraphrases result）
                   ↓
               user
 ```
 
-Why this fails:
-- Pure routing layer with no domain value
-- Adds two paraphrasing hops → information loss + 2× token cost
-- The user already knows they want a review; let them call `/review` directly
-- Replicates work that slash commands and `AGENTS.md` intent-mapping already do
+为什么这会失败：
+- 纯路由层，没有领域价值
+- 增加两次转述跳转 → 信息损失 + 2 倍 token 成本
+- 用户已经知道自己要 review；让他们直接调用 `/review`
+- 重复 slash commands 和 `AGENTS.md` 意图映射已经负责的工作
 
-## Rules for personas
+## Persona 规则
 
-1. A persona is a single role with a single output format. If you find yourself adding a second role, create a second persona.
-2. **Personas do not invoke other personas.** Composition is the job of slash commands or the user. On Claude Code this is also a hard platform constraint — *"subagents cannot spawn other subagents"* — so the rule is enforced for you.
-3. A persona may invoke skills (the *how*).
-4. Every persona file ends with a "Composition" block stating where it fits.
+1. 一个 persona 是单一角色，并且只有一种输出格式。如果你发现自己在添加第二个角色，请创建第二个 persona。
+2. **Personas 不调用其他 personas。** 组合是 slash commands 或用户的职责。在 Claude Code 上这也是硬性平台约束：*"subagents cannot spawn other subagents"*，因此平台会替你执行这条规则。
+3. Persona 可以调用 skills（即 *how*）。
+4. 每个 persona 文件都以 "Composition" block 结尾，说明它适合放在哪里。
 
-## Claude Code interop
+## Claude Code 互操作
 
-The personas in this repo are designed to work as Claude Code subagents and as Agent Teams teammates without modification:
+本仓库中的 personas 设计为无需修改即可作为 Claude Code subagents 和 Agent Teams teammates 工作：
 
-- **As subagents:** auto-discovered when this plugin is enabled (no path config needed). Use the Agent tool with `subagent_type: code-reviewer` (or `security-auditor`, `test-engineer`). `/ship` is the canonical example.
-- **As Agent Teams teammates** (experimental, requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`): reference the same persona name when spawning a teammate. The persona's body is **appended to** the teammate's system prompt as additional instructions (not a replacement), so your persona text sits on top of the team-coordination instructions the lead installs (SendMessage, task-list tools, etc.).
+- **作为 subagents：** 启用此 plugin 后会自动发现（不需要路径配置）。使用 Agent tool，并设置 `subagent_type: code-reviewer`（或 `security-auditor`、`test-engineer`）。`/ship` 是标准示例。
+- **作为 Agent Teams teammates**（实验性，需要 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`）：spawn teammate 时引用相同的 persona name。Persona 正文会作为附加指令**追加到** teammate 的 system prompt（不是替换），因此你的 persona 文本会叠加在 lead 安装的团队协作指令之上（SendMessage、task-list tools 等）。
 
-Subagents only report results back to the main agent. Agent Teams let teammates message each other directly. Use subagents when reports are enough; use Agent Teams when sub-agents need to challenge each other's findings (e.g. competing-hypothesis debugging). See [references/orchestration-patterns.md](../references/orchestration-patterns.md) for the full mapping.
+Subagents 只把结果报告回 main agent。Agent Teams 允许 teammates 彼此直接发消息。当报告足够时使用 subagents；当 sub-agents 需要相互质疑发现时使用 Agent Teams（例如 competing-hypothesis debugging）。完整映射见 [references/orchestration-patterns.md](../references/orchestration-patterns.md)。
 
-Plugin agents do not support `hooks`, `mcpServers`, or `permissionMode` frontmatter — those fields are silently ignored. Avoid relying on them when authoring new personas here.
+Plugin agents 不支持 `hooks`、`mcpServers` 或 `permissionMode` frontmatter，这些字段会被静默忽略。在这里编写新的 personas 时，不要依赖它们。
 
-## Adding a new persona
+## 添加新 persona
 
-1. Create `agents/<role>.md` with the same frontmatter format used by existing personas.
-2. Define the role, scope, output format, and rules.
-3. Add a **Composition** block at the bottom (Invoke directly when / Invoke via / Do not invoke from another persona).
-4. Add the persona to the table at the top of this file.
-5. If the persona enables a new orchestration pattern, document it in `references/orchestration-patterns.md` rather than inventing the pattern in the persona file itself.
+1. 创建 `agents/<role>.md`，使用与现有 personas 相同的 frontmatter 格式。
+2. 定义角色、范围、输出格式和规则。
+3. 在底部添加 **Composition** block（Invoke directly when / Invoke via / Do not invoke from another persona）。
+4. 将该 persona 添加到本文件顶部的表格中。
+5. 如果该 persona 启用了新的编排模式，请在 `references/orchestration-patterns.md` 中记录，而不是在 persona 文件本身发明该模式。

@@ -1,53 +1,53 @@
-# Orchestration Patterns
+# Orchestration Patterns（编排模式）
 
-Reference catalog of agent orchestration patterns this repo endorses, plus anti-patterns to avoid. Read this before adding a new slash command that coordinates multiple personas, or before introducing a new persona that "wraps" existing ones.
+本参考目录列出本仓库认可的 agent 编排模式，以及应避免的反模式。在新增一个协调多个 personas 的 slash command，或引入一个“包装”现有 personas 的新 persona 之前，请先阅读本文。
 
-The governing rule: **the user (or a slash command) is the orchestrator. Personas do not invoke other personas.** Skills are mandatory hops inside a persona's workflow.
+治理规则是：**用户（或 slash command）是编排者。Personas 不调用其他 personas。** Skills 是 persona 工作流中的强制步骤。
 
 ---
 
-## Endorsed patterns
+## Endorsed patterns（认可模式）
 
-### 1. Direct invocation (no orchestration)
+### 1. Direct invocation（直接调用，无编排）
 
-Single persona, single perspective, single artifact. The default and the cheapest option.
+单个 persona、单一视角、单个产物。这是默认选项，也是成本最低的选项。
 
 ```
 user → code-reviewer → report → user
 ```
 
-**Use when:** the work is one perspective on one artifact and you can describe it in one sentence.
+**Use when:** 工作是对一个产物的一种视角，并且可以用一句话描述清楚。
 
 **Examples:**
 - "Review this PR" → `code-reviewer`
 - "Find security issues in `auth.ts`" → `security-auditor`
 - "What tests are missing for the checkout flow?" → `test-engineer`
 
-**Cost:** one round trip. The baseline you should always compare orchestrated patterns against.
+**Cost:** 一次往返。这是评估任何编排模式时都应对照的基线。
 
 ---
 
-### 2. Single-persona slash command
+### 2. Single-persona slash command（单 persona slash command）
 
-A slash command that wraps one persona with the project's skills. Saves the user from re-explaining the workflow every time.
+一个 slash command 用项目 skills 包装一个 persona。这样用户不必每次都重新解释工作流。
 
 ```
 /review → code-reviewer (with code-review-and-quality skill) → report
 ```
 
-**Use when:** the same single-persona invocation happens repeatedly with the same setup.
+**Use when:** 同一个单 persona 调用会以相同设置反复发生。
 
 **Examples in this repo:** `/review`, `/test`, `/code-simplify`.
 
-**Cost:** same as direct invocation. The slash command is just a saved prompt.
+**Cost:** 与直接调用相同。slash command 只是一个保存下来的 prompt。
 
-**Anti-signal:** if the slash command's body is mostly "decide which persona to call," delete it and let the user call the persona directly.
+**Anti-signal:** 如果 slash command 的主体主要是在“决定调用哪个 persona”，就删除它，让用户直接调用对应 persona。
 
 ---
 
-### 3. Parallel fan-out with merge
+### 3. Parallel fan-out with merge（并行扇出并合并）
 
-Multiple personas operate on the same input concurrently, each producing an independent report. A merge step (in the main agent's context) synthesizes them into a single decision.
+多个 personas 并发处理同一输入，各自产出独立报告。合并步骤（在 main agent 的上下文中）把它们综合成一个决策。
 
 ```
                     ┌─→ code-reviewer    ─┐
@@ -56,153 +56,153 @@ Multiple personas operate on the same input concurrently, each producing an inde
 ```
 
 **Use when:**
-- The sub-tasks are genuinely independent (no shared mutable state, no ordering dependency)
-- Each sub-agent benefits from its own context window
-- The merge step is small enough to stay in the main context
-- Wall-clock latency matters
+- 子任务真正独立（没有共享可变状态，也没有顺序依赖）
+- 每个 sub-agent 都能从自己的 context window 中获益
+- 合并步骤足够小，可以留在 main context 中完成
+- wall-clock latency 很重要
 
 **Examples in this repo:** `/ship`.
 
-**Cost:** N parallel sub-agent contexts + one merge turn. Higher than direct invocation, but faster wall-clock and produces better reports because each sub-agent stays focused on its single perspective.
+**Cost:** N 个并行 sub-agent contexts + 一个合并回合。成本高于直接调用，但 wall-clock 更快，报告质量也更好，因为每个 sub-agent 都能专注于自己的单一视角。
 
 **Validation checklist before adopting this pattern:**
-- [ ] Can I run all sub-agents at the same time without ordering issues?
-- [ ] Does each persona produce a different *kind* of finding, not just the same finding from a different angle?
-- [ ] Will the merge step fit in the main agent's remaining context?
-- [ ] Is the user's wait time long enough that parallelism is actually noticeable?
+- [ ] 我能否同时运行所有 sub-agents，且不会产生顺序问题？
+- [ ] 每个 persona 是否产出不同*类型*的发现，而不是从不同角度重复同一种发现？
+- [ ] 合并步骤是否能放进 main agent 剩余的 context 中？
+- [ ] 用户等待时间是否长到足以让并行带来的收益明显？
 
-If any answer is "no," fall back to direct invocation or a single-persona command.
+如果任一答案是“否”，回退到直接调用或单 persona command。
 
 ---
 
-### 4. Sequential pipeline as user-driven slash commands
+### 4. Sequential pipeline as user-driven slash commands（用户驱动的顺序 slash command 流水线）
 
-The user runs slash commands in a defined order, carrying context (or commit history) between them. There is no orchestrator agent — the user IS the orchestrator.
+用户按定义好的顺序运行 slash commands，并在步骤之间携带上下文（或 commit history）。这里没有 orchestrator agent，用户就是 orchestrator。
 
 ```
 user runs:  /spec  →  /plan  →  /build  →  /test  →  /review  →  /ship
 ```
 
-**Use when:** the workflow has dependencies (each step needs the previous step's output) and human judgment between steps adds value.
+**Use when:** 工作流存在依赖关系（每一步都需要上一步的输出），并且步骤之间的人类判断有价值。
 
-**Examples in this repo:** the entire DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP lifecycle.
+**Examples in this repo:** 完整的 DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP 生命周期。
 
-**Cost:** one sub-agent context per step. Free for the orchestration layer because there is no orchestrator agent.
+**Cost:** 每个步骤一个 sub-agent context。对编排层来说是免费的，因为没有 orchestrator agent。
 
-**Why not automate it:** an LLM "lifecycle orchestrator" would (a) lose nuance between steps because it has to summarize for hand-off, (b) skip the human checkpoints that catch wrong-direction work early, and (c) double the token cost via paraphrasing turns.
+**Why not automate it:** 一个 LLM “lifecycle orchestrator”会因为必须为 hand-off 做总结而 (a) 在步骤之间丢失细微差别，(b) 跳过能及早捕捉错误方向的人类检查点，(c) 通过复述回合使 token 成本翻倍。
 
 ---
 
-### 5. Research isolation (context preservation)
+### 5. Research isolation（研究隔离，保留上下文）
 
-When a task requires reading large amounts of material that shouldn't pollute the main context, spawn a research sub-agent that returns only a digest.
+当任务需要阅读大量材料，而这些材料不应污染 main context 时，启动一个 research sub-agent，只返回摘要。
 
 ```
 main agent → research sub-agent (reads 50 files) → digest → main agent continues
 ```
 
 **Use when:**
-- The main session needs to stay focused on a downstream task
-- The investigation result is much smaller than the input it consumes
-- The decision quality benefits from the main agent having room to think after
+- main session 需要专注于后续任务
+- 调查结果远小于它消耗的输入
+- main agent 在之后保留足够思考空间，会提升决策质量
 
 **Examples:** "Find every call site of this deprecated API across the monorepo," "Summarize what these 30 ADRs say about caching."
 
-**Cost:** one isolated sub-agent context. Worth it any time the alternative is loading hundreds of files into the main context.
+**Cost:** 一个隔离的 sub-agent context。只要替代方案是把数百个文件加载进 main context，这个成本就是值得的。
 
-**On Claude Code, use the built-in `Explore` subagent** rather than defining a custom research persona. `Explore` runs on Haiku, is denied write/edit tools, and is purpose-built for this pattern. Define a custom research subagent only when `Explore` doesn't fit (e.g. you need a domain-specific system prompt the model wouldn't infer).
+**On Claude Code, use the built-in `Explore` subagent**，而不是定义自定义 research persona。`Explore` 运行在 Haiku 上，被拒绝写入/编辑工具，并且专门为这种模式设计。只有当 `Explore` 不适用时（例如你需要模型无法自行推断出的 domain-specific system prompt），才定义自定义 research subagent。
 
 ---
 
-## Claude Code compatibility
+## Claude Code compatibility（Claude Code 兼容性）
 
-This catalog is harness-agnostic, but most readers will run it on Claude Code. Here's how each pattern maps onto Claude Code's primitives — and where the platform enforces our rules for us.
+本目录与 harness 无关，但大多数读者会在 Claude Code 上运行它。下面说明每种模式如何映射到 Claude Code primitives，以及平台在哪些地方会替我们强制执行规则。
 
-### Where personas live
+### Where personas live（Personas 的位置）
 
-Plugin subagents go in `agents/` at the plugin root. This repo is a plugin (`.claude-plugin/plugin.json`), so `agents/code-reviewer.md`, `agents/security-auditor.md`, and `agents/test-engineer.md` are auto-discovered when the plugin is enabled. No path configuration needed.
+Plugin subagents 放在 plugin root 的 `agents/` 中。本仓库是一个 plugin（`.claude-plugin/plugin.json`），因此启用 plugin 后，`agents/code-reviewer.md`、`agents/security-auditor.md` 和 `agents/test-engineer.md` 会被自动发现。不需要配置路径。
 
 ### Subagents vs. Agent Teams
 
-Claude Code has two parallelism primitives. Pattern 3 (parallel fan-out with merge) maps to **subagents**. If you need teammates that talk to each other, use **Agent Teams** instead.
+Claude Code 有两种并行 primitives。模式 3（parallel fan-out with merge）映射到 **subagents**。如果你需要会彼此对话的 teammates，请改用 **Agent Teams**。
 
 | | Subagents | Agent Teams |
 |--|-----------|-------------|
-| Coordination | Main agent fans out, sub-agents only report back | Teammates message each other, share a task list |
-| Context | Own context window per subagent | Own context window per teammate |
-| When to use | Independent tasks producing reports | Collaborative work needing discussion |
+| Coordination | Main agent 扇出，sub-agents 只回报结果 | Teammates 互相发消息，共享 task list |
+| Context | 每个 subagent 有自己的 context window | 每个 teammate 有自己的 context window |
+| When to use | 产出报告的独立任务 | 需要讨论的协作工作 |
 | Status | Stable | Experimental — requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
-| Cost | Lower | Higher — each teammate is a separate Claude instance |
+| Cost | 更低 | 更高 — 每个 teammate 都是单独的 Claude instance |
 
-**The personas in this repo work in both modes.** When spawned as subagents (e.g. by `/ship`), they report findings to the main session. When spawned as teammates (`Spawn a teammate using the security-auditor agent type…`), they can challenge each other's findings directly. The persona definition is the same; only the spawning context changes.
+**本仓库中的 personas 在两种模式下都可用。** 当它们作为 subagents 启动时（例如由 `/ship` 启动），它们向 main session 报告发现。当它们作为 teammates 启动时（`Spawn a teammate using the security-auditor agent type…`），它们可以直接质疑彼此的发现。Persona 定义相同；只有启动上下文不同。
 
-One subtlety: the `skills` and `mcpServers` frontmatter fields in a persona are honored when it runs as a subagent but **ignored when it runs as a teammate** — teammates load skills and MCP servers from your project and user settings, the same as a regular session. If a persona depends on a specific skill or MCP server being loaded, configure it at the session level so it's available in both modes.
+一个细节：persona frontmatter 中的 `skills` 和 `mcpServers` 字段在它作为 subagent 运行时会被遵守，但**作为 teammate 运行时会被忽略**。Teammates 会像普通 session 一样，从你的项目和用户设置加载 skills 与 MCP servers。如果某个 persona 依赖特定 skill 或 MCP server 已加载，请在 session 层配置它，确保两种模式都可用。
 
-### Platform-enforced rules
+### Platform-enforced rules（平台强制规则）
 
-Two rules in this catalog aren't just convention — Claude Code enforces them:
+本目录中的两条规则不只是约定，Claude Code 会强制执行：
 
-- **"Subagents cannot spawn other subagents"** (verbatim from the docs). Anti-pattern B (persona-calls-persona) and Anti-pattern D (deep persona trees) cannot exist on Claude Code by construction.
-- **"No nested teams"** — teammates cannot spawn their own teams. Same anti-patterns blocked at the team level.
+- **"Subagents cannot spawn other subagents"**（文档原文）。Anti-pattern B（persona-calls-persona）和 Anti-pattern D（deep persona trees）在 Claude Code 上从结构上就无法存在。
+- **"No nested teams"** — teammates 不能再启动自己的 teams。同样的反模式也会在 team 层被阻止。
 
-This means you can adopt the patterns in this catalog without worrying about contributors accidentally building the anti-patterns. They'll just fail to load.
+这意味着你可以采用本目录中的模式，而不用担心贡献者意外构建出这些反模式。它们只会加载失败。
 
-### Built-in subagents to know about
+### Built-in subagents to know about（需要知道的内置 subagents）
 
-Before defining a custom subagent, check whether one of these covers the role:
+在定义自定义 subagent 之前，先检查下面这些是否已经覆盖对应角色：
 
 | Built-in | Purpose |
 |----------|---------|
-| `Explore` | Read-only codebase search and analysis. Use this for Pattern 5 (research isolation). |
-| `Plan` | Read-only research during plan mode. |
-| `general-purpose` | Multi-step tasks needing both exploration and modification. |
+| `Explore` | 只读代码库搜索和分析。用于模式 5（research isolation）。 |
+| `Plan` | plan mode 中的只读研究。 |
+| `general-purpose` | 同时需要探索和修改的多步骤任务。 |
 
-Don't redefine these. Layer your specialist personas (code-reviewer, security-auditor, test-engineer) on top of them.
+不要重新定义这些。把你的 specialist personas（code-reviewer、security-auditor、test-engineer）叠加在它们之上。
 
-### Frontmatter restrictions for plugin agents
+### Frontmatter restrictions for plugin agents（Plugin agents 的 frontmatter 限制）
 
-Plugin subagents do **not** support the `hooks`, `mcpServers`, or `permissionMode` frontmatter fields — these are silently ignored. If a future persona needs any of those, the user must copy the file into `.claude/agents/` or `~/.claude/agents/` instead.
+Plugin subagents **不**支持 `hooks`、`mcpServers` 或 `permissionMode` frontmatter 字段；这些字段会被静默忽略。如果未来某个 persona 需要其中任何字段，用户必须改为把文件复制到 `.claude/agents/` 或 `~/.claude/agents/`。
 
-The fields that DO work in plugin agents are: `name`, `description`, `tools`, `disallowedTools`, `model`, `maxTurns`, `skills`, `memory`, `background`, `effort`, `isolation`, `color`, `initialPrompt`. Use `model` per-persona if you want to optimize cost (e.g. Haiku for `test-engineer` coverage scans, Sonnet for `code-reviewer`, Opus for `security-auditor`).
+Plugin agents 中可用的字段包括：`name`, `description`, `tools`, `disallowedTools`, `model`, `maxTurns`, `skills`, `memory`, `background`, `effort`, `isolation`, `color`, `initialPrompt`。如果你想优化成本，可以按 persona 使用 `model`（例如用 Haiku 做 `test-engineer` 覆盖率扫描，用 Sonnet 做 `code-reviewer`，用 Opus 做 `security-auditor`）。
 
-### Spawning multiple subagents in parallel
+### Spawning multiple subagents in parallel（并行启动多个 subagents）
 
-In Claude Code, parallel fan-out (Pattern 3) requires issuing **multiple Agent tool calls in a single assistant turn**. Sequential turns serialize execution. `/ship` calls this out explicitly. Any new orchestrator command should do the same.
+在 Claude Code 中，parallel fan-out（模式 3）要求在**同一个 assistant turn 中发出多个 Agent tool calls**。顺序回合会把执行串行化。`/ship` 已明确说明这一点。任何新的 orchestrator command 也应这样说明。
 
 ---
 
-## Worked example: Agent Teams for competing-hypothesis debugging
+## Worked example: Agent Teams for competing-hypothesis debugging（示例：用 Agent Teams 做竞争性假设调试）
 
-This example shows when to reach for **Agent Teams** instead of `/ship`'s subagent fan-out. The two patterns look similar from a distance — both spawn the same three personas — but the value comes from a different place.
+这个示例展示何时应该使用 **Agent Teams**，而不是 `/ship` 的 subagent fan-out。从远处看，这两种模式相似，都会启动相同的三个 personas，但价值来源不同。
 
-### The scenario
+### The scenario（场景）
 
 > *Checkout occasionally hangs for ~30 seconds before completing. It happens roughly once every 50 sessions. No errors in logs. Started after last week's release.*
 
-Plausible root causes (mutually exclusive, all fit the symptoms):
+可能的根因（相互排斥，并且都符合症状）：
 
-1. A race condition in the new payment-confirmation flow
-2. An auth check that occasionally falls through to a slow synchronous network call
-3. A missing index on a query that scales with cart size
-4. A flaky third-party API where the SDK retries silently before timing out
+1. 新 payment-confirmation flow 中存在 race condition
+2. 某个 auth check 偶尔落入缓慢的同步 network call
+3. 某个查询缺少 index，且耗时随 cart size 扩大
+4. 某个不稳定的 third-party API，其 SDK 在 timeout 前静默 retry
 
-A single agent will pick the first plausible theory and stop investigating. A `/ship`-style subagent fan-out would have each persona report independently — but their reports never meet, so nothing rules out the wrong theories.
+单个 agent 会选择第一个看似合理的理论，然后停止调查。`/ship` 风格的 subagent fan-out 会让每个 persona 独立报告，但它们的报告不会相互碰撞，因此无法排除错误理论。
 
-This is exactly the case the Agent Teams docs describe: *"With multiple independent investigators actively trying to disprove each other, the theory that survives is much more likely to be the actual root cause."*
+这正是 Agent Teams 文档描述的场景：*"With multiple independent investigators actively trying to disprove each other, the theory that survives is much more likely to be the actual root cause."*
 
-### Why this is *not* a `/ship` job
+### Why this is *not* a `/ship` job（为什么这不是 `/ship` 任务）
 
 | | `/ship` (subagents) | Agent Teams |
 |--|--------------------|-------------|
-| Sub-agents see | The same diff, different lenses | A shared task list, each other's messages |
-| Output | Three independent reports → one merge | Adversarial debate → consensus root cause |
-| Right when | You want a verdict on a known artifact | You want to *find* the artifact among hypotheses |
+| Sub-agents see | 同一个 diff，不同 lens | 共享 task list，以及彼此的消息 |
+| Output | 三份独立报告 → 一次合并 | 对抗式讨论 → 共识根因 |
+| Right when | 你想对已知 artifact 得到裁决 | 你想在多个 hypotheses 中*找出* artifact |
 
-`/ship` is a verdict; Agent Teams is an investigation.
+`/ship` 是裁决；Agent Teams 是调查。
 
-### Setup (one-time, per-environment)
+### Setup (one-time, per-environment)（一次性环境设置）
 
-Agent Teams is experimental. In `~/.claude/settings.json`:
+Agent Teams 是 experimental。在 `~/.claude/settings.json` 中：
 
 ```json
 {
@@ -212,11 +212,11 @@ Agent Teams is experimental. In `~/.claude/settings.json`:
 }
 ```
 
-Requires Claude Code v2.1.32 or later. The personas in this repo are picked up automatically — no team-config files to author by hand.
+需要 Claude Code v2.1.32 或更高版本。本仓库中的 personas 会被自动加载，不需要手写 team-config 文件。
 
-### The trigger prompt
+### The trigger prompt（触发 prompt）
 
-Type into the lead session, in natural language:
+在 lead session 中用自然语言输入：
 
 ```
 Users report checkout hangs for ~30 seconds intermittently after last
@@ -237,112 +237,112 @@ theories. Update findings as consensus emerges. Only converge when
 two teammates agree they can disprove the others'.
 ```
 
-The lead spawns three teammates referencing the existing persona names. The persona body is **appended** to each teammate's system prompt as additional instructions (on top of the team-coordination instructions the lead installs); the trigger prompt above becomes their task.
+Lead 会启动三个 teammates，并引用现有 persona 名称。Persona body 会作为附加说明被**追加**到每个 teammate 的 system prompt 中（位于 lead 安装的 team-coordination instructions 之上）；上面的 trigger prompt 会成为它们的任务。
 
-### What happens
+### What happens（会发生什么）
 
-1. Each teammate runs in its own context window, exploring the codebase from its own lens.
-2. Teammates use `message` to send findings to each other directly. The lead doesn't have to relay.
-3. The shared task list shows who's investigating what — visible at any time with `Ctrl+T` (in-process mode) or in a tmux pane (split mode).
-4. When `code-reviewer` finds a `Promise.all` that should be sequential, it messages `security-auditor` to confirm the auth call isn't part of the race. `security-auditor` checks and replies — either confirming the race is the real issue or producing counter-evidence.
-5. `test-engineer` proposes a focused integration test for whichever theory is winning, which the team uses to verify before declaring consensus.
-6. The lead synthesizes the converged finding and presents it to you.
+1. 每个 teammate 都在自己的 context window 中运行，并从自己的 lens 探索代码库。
+2. Teammates 使用 `message` 直接向彼此发送发现。Lead 不需要转述。
+3. 共享 task list 显示谁正在调查什么，任何时候都可以用 `Ctrl+T`（in-process mode）或在 tmux pane（split mode）中查看。
+4. 当 `code-reviewer` 发现一个本应顺序执行的 `Promise.all` 时，它会给 `security-auditor` 发消息，请对方确认 auth call 不是 race 的一部分。`security-auditor` 检查后回复，要么确认 race 是真正问题，要么提出反证。
+5. `test-engineer` 为当前胜出的理论提出一个聚焦的 integration test，团队在宣布共识前用它进行验证。
+6. Lead 综合已经收敛的发现并呈现给你。
 
-You can interrupt at any teammate by cycling with `Shift+Down` and typing — useful for redirecting an investigator who's gone down a wrong path.
+你可以通过 `Shift+Down` 在 teammates 之间切换并输入内容，从而中断任一 teammate；这适合重定向走错方向的调查者。
 
-### When to clean up
+### When to clean up（何时清理）
 
-When the investigation lands on a root cause, tell the lead:
+当调查落到某个根因上时，告诉 lead：
 
 ```
 Clean up the team
 ```
 
-Always cleanup through the lead, not a teammate (per the docs: teammates lack full team context for cleanup).
+始终通过 lead 清理，而不是通过 teammate（根据文档，teammates 缺少清理所需的完整 team context）。
 
-### Cost expectation
+### Cost expectation（成本预期）
 
-Three Sonnet teammates running for ~10–15 minutes of investigation costs noticeably more than the same three personas spawned as subagents by `/ship`. The justification is *quality of conclusion* — for production debugging where the wrong fix is expensive, the extra tokens are a bargain. For a routine PR review, stick with `/ship`.
+三个 Sonnet teammates 运行约 10-15 分钟的调查，会明显比 `/ship` 以 subagents 启动同样三个 personas 更贵。理由是*结论质量*：对于生产调试而言，错误修复的成本很高，额外 token 很划算。对于常规 PR review，请继续使用 `/ship`。
 
-### Anti-pattern in this scenario
+### Anti-pattern in this scenario（此场景中的反模式）
 
-Do **not** rebuild this as a `/debug` slash command that fans out subagents. Subagents can't message each other — you'd lose the adversarial debate that makes the pattern work. If a workflow keeps coming up, document the trigger prompt above as a snippet rather than wrapping it in a slash command that misuses subagents.
+**不要**把它重建为一个会扇出 subagents 的 `/debug` slash command。Subagents 不能彼此发消息，因此你会失去让该模式有效的对抗式讨论。如果某个工作流不断出现，把上面的 trigger prompt 记录为 snippet，而不是把它包装进一个误用 subagents 的 slash command。
 
-### When *not* to use Agent Teams
+### When *not* to use Agent Teams（什么时候不使用 Agent Teams）
 
-- Production-bound verdict on a known diff → use `/ship` (subagents).
-- One specialist perspective on one artifact → direct persona invocation.
-- Sequential lifecycle (spec → plan → build) → user-driven slash commands (Pattern 4).
-- Read-heavy research with a small digest → built-in `Explore` subagent.
+- 对已知 diff 做 production-bound verdict → 使用 `/ship`（subagents）。
+- 对一个 artifact 使用一个 specialist perspective → 直接调用 persona。
+- 顺序生命周期（spec → plan → build）→ 用户驱动的 slash commands（模式 4）。
+- 大量阅读但只需小摘要的 research → 内置 `Explore` subagent。
 
-Reach for Agent Teams only when teammates **need** to challenge each other to produce the right answer.
+只有当 teammates **需要**相互质疑才能产出正确答案时，才使用 Agent Teams。
 
 ---
 
-## Anti-patterns
+## Anti-patterns（反模式）
 
 ### A. Router persona ("meta-orchestrator")
 
-A persona whose job is to decide which other persona to call.
+职责是决定调用哪个其他 persona 的 persona。
 
 ```
 /work → router-persona → "this needs a review" → code-reviewer → router (paraphrases) → user
 ```
 
 **Why it fails:**
-- Pure routing layer with no domain value
-- Adds two paraphrasing hops → information loss + roughly 2× token cost
-- The user already knew they wanted a review; they could have called `/review` directly
-- Replicates the work that slash commands and intent mapping in `AGENTS.md` already do
+- 纯 routing layer，没有领域价值
+- 增加两个复述跳点 → 信息损失 + 约 2× token 成本
+- 用户已经知道自己想要 review；本可以直接调用 `/review`
+- 重复了 slash commands 和 `AGENTS.md` 中 intent mapping 已经负责的工作
 
-**What to do instead:** add or refine slash commands. Document intent → command mapping in `AGENTS.md`.
+**What to do instead:** 添加或改进 slash commands。在 `AGENTS.md` 中记录 intent → command mapping。
 
 ---
 
-### B. Persona that calls another persona
+### B. Persona that calls another persona（调用另一个 persona 的 persona）
 
-A `code-reviewer` that internally invokes `security-auditor` when it sees auth code.
+一个 `code-reviewer` 在看到 auth code 时内部调用 `security-auditor`。
 
 **Why it fails:**
-- Personas were designed to produce a single perspective; chaining them defeats that
-- The summary the calling persona passes loses context the called persona needs
-- Failure modes multiply (which persona's output format wins? whose rules apply?)
-- Hides cost from the user
+- Personas 被设计为产出单一视角；把它们串起来会破坏这个目标
+- 调用方 persona 传递的摘要会丢失被调用 persona 所需的上下文
+- Failure modes 成倍增加（哪个 persona 的输出格式优先？谁的规则适用？）
+- 向用户隐藏成本
 
-**What to do instead:** have the calling persona *recommend* a follow-up audit in its report. The user or a slash command runs the second pass.
+**What to do instead:** 让调用方 persona 在报告中*建议*后续 audit。由用户或 slash command 运行第二轮。
 
 ---
 
-### C. Sequential orchestrator that paraphrases
+### C. Sequential orchestrator that paraphrases（会复述的顺序 orchestrator）
 
-An agent that calls `/spec`, then `/plan`, then `/build`, etc. on the user's behalf.
+一个 agent 代表用户依次调用 `/spec`、然后 `/plan`、然后 `/build` 等。
 
 **Why it fails:**
-- Loses the human checkpoints that catch wrong-direction work
-- Each hand-off summarizes context — accumulated drift over a long pipeline
-- Doubles token cost: orchestrator turn + sub-agent turn for every step
-- Removes user agency at exactly the points where judgment matters most
+- 丢失能捕捉错误方向的人类检查点
+- 每次 hand-off 都会总结上下文，在长流水线中累积漂移
+- token 成本翻倍：每一步都需要 orchestrator turn + sub-agent turn
+- 恰好在最需要判断的位置移除了用户主导权
 
-**What to do instead:** keep the user as the orchestrator. Document the recommended sequence in `README.md` and let users invoke it.
+**What to do instead:** 保持用户作为 orchestrator。在 `README.md` 中记录推荐顺序，让用户自行调用。
 
 ---
 
-### D. Deep persona trees
+### D. Deep persona trees（深层 persona 树）
 
-`/ship` calls a `pre-ship-coordinator` that calls a `quality-coordinator` that calls `code-reviewer`.
+`/ship` 调用 `pre-ship-coordinator`，后者调用 `quality-coordinator`，后者再调用 `code-reviewer`。
 
 **Why it fails:**
-- Each layer adds latency and tokens with no decision value
-- Debugging becomes a multi-level investigation
-- The leaf personas lose context to multiple summarization steps
+- 每一层都会增加 latency 和 tokens，却没有决策价值
+- 调试会变成多层级调查
+- 叶子 personas 会因为多次总结步骤而丢失上下文
 
-**What to do instead:** keep the orchestration depth at most 1 (slash command → personas). The merge happens in the main agent.
+**What to do instead:** 将编排深度保持在最多 1 层（slash command → personas）。合并发生在 main agent 中。
 
 ---
 
-## Decision flow
+## Decision flow（决策流程）
 
-When considering a new orchestrated workflow, walk this flow:
+考虑新的编排工作流时，按这个流程走：
 
 ```
 Is the work one perspective on one artifact?
@@ -358,13 +358,13 @@ Is the work one perspective on one artifact?
 
 ---
 
-## When to add a new pattern to this catalog
+## When to add a new pattern to this catalog（何时向本目录添加新模式）
 
-Add a new entry only after:
+仅在满足以下条件后，才添加新条目：
 
-1. You've used the pattern at least twice in real work
-2. You can name a concrete artifact in this repo that demonstrates it
-3. You can explain why an existing pattern wouldn't have worked
-4. You can describe its anti-pattern shadow (what people will mistakenly build instead)
+1. 你已经在真实工作中至少使用过该模式两次
+2. 你能指出本仓库中一个具体 artifact 来展示它
+3. 你能解释为什么现有模式无法胜任
+4. 你能描述它的 anti-pattern shadow（人们会误建成什么）
 
-Premature catalog entries become aspirational documentation that no one follows.
+过早加入目录的条目会变成没人遵循的愿景式文档。

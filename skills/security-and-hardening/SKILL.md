@@ -1,59 +1,59 @@
 ---
 name: security-and-hardening
-description: Hardens code against vulnerabilities. Use when handling user input, authentication, data storage, or external integrations. Use when building any feature that accepts untrusted data, manages user sessions, or interacts with third-party services.
+description: 加固代码以抵御漏洞。Use when handling user input, authentication, data storage, or external integrations. 用于构建任何接收不可信数据、管理用户会话或与第三方服务交互的功能。
 ---
 
-# Security and Hardening
+# Security and Hardening（安全与加固）
 
-## Overview
+## Overview（概览）
 
-Security-first development practices for web applications. Treat every external input as hostile, every secret as sacred, and every authorization check as mandatory. Security isn't a phase — it's a constraint on every line of code that touches user data, authentication, or external systems.
+面向 Web 应用的安全优先开发实践。把每个外部输入都视为恶意，把每个 secret 都视为敏感，把每个授权检查都视为强制要求。安全不是一个阶段，而是约束每一行触及用户数据、认证或外部系统代码的条件。
 
-## When to Use
+## When to Use（何时使用）
 
-- Building anything that accepts user input
-- Implementing authentication or authorization
-- Storing or transmitting sensitive data
-- Integrating with external APIs or services
-- Adding file uploads, webhooks, or callbacks
-- Handling payment or PII data
+- 构建任何接收用户输入的功能
+- 实现认证或授权
+- 存储或传输敏感数据
+- 集成外部 API 或服务
+- 添加文件上传、webhook 或 callback
+- 处理支付或 PII 数据
 
-## The Three-Tier Boundary System
+## The Three-Tier Boundary System（三层边界系统）
 
-### Always Do (No Exceptions)
+### Always Do (No Exceptions)（始终执行，无例外）
 
-- **Validate all external input** at the system boundary (API routes, form handlers)
-- **Parameterize all database queries** — never concatenate user input into SQL
-- **Encode output** to prevent XSS (use framework auto-escaping, don't bypass it)
-- **Use HTTPS** for all external communication
-- **Hash passwords** with bcrypt/scrypt/argon2 (never store plaintext)
-- **Set security headers** (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)
-- **Use httpOnly, secure, sameSite cookies** for sessions
-- **Run `npm audit`** (or equivalent) before every release
+- **在系统边界验证所有外部输入**（API routes、form handlers）
+- **参数化所有数据库查询**，绝不要把用户输入拼接进 SQL
+- **编码输出** 以防止 XSS（使用框架自动转义，不要绕过它）
+- **所有外部通信使用 HTTPS**
+- **使用 bcrypt/scrypt/argon2 哈希密码**（绝不存储明文）
+- **设置安全 header**（CSP、HSTS、X-Frame-Options、X-Content-Type-Options）
+- **会话使用 httpOnly、secure、sameSite cookies**
+- **每次发布前运行 `npm audit`**（或等价工具）
 
-### Ask First (Requires Human Approval)
+### Ask First (Requires Human Approval)（先询问，需要人类批准）
 
-- Adding new authentication flows or changing auth logic
-- Storing new categories of sensitive data (PII, payment info)
-- Adding new external service integrations
-- Changing CORS configuration
-- Adding file upload handlers
-- Modifying rate limiting or throttling
-- Granting elevated permissions or roles
+- 添加新的认证流程或修改认证逻辑
+- 存储新的敏感数据类别（PII、支付信息）
+- 添加新的外部服务集成
+- 修改 CORS 配置
+- 添加文件上传处理器
+- 修改 rate limiting 或 throttling
+- 授予更高权限或角色
 
-### Never Do
+### Never Do（绝不执行）
 
-- **Never commit secrets** to version control (API keys, passwords, tokens)
-- **Never log sensitive data** (passwords, tokens, full credit card numbers)
-- **Never trust client-side validation** as a security boundary
-- **Never disable security headers** for convenience
-- **Never use `eval()` or `innerHTML`** with user-provided data
-- **Never store sessions in client-accessible storage** (localStorage for auth tokens)
-- **Never expose stack traces** or internal error details to users
+- **绝不将 secret 提交到版本控制**（API keys、passwords、tokens）
+- **绝不记录敏感数据到日志**（passwords、tokens、完整信用卡号）
+- **绝不把客户端验证当成安全边界**
+- **绝不为了方便禁用安全 header**
+- **绝不对用户提供的数据使用 `eval()` 或 `innerHTML`**
+- **绝不把会话存储在客户端可访问的存储中**（localStorage 中的 auth tokens）
+- **绝不向用户暴露 stack trace 或内部错误详情**
 
-## OWASP Top 10 Prevention
+## OWASP Top 10 Prevention（OWASP Top 10 防护）
 
-### 1. Injection (SQL, NoSQL, OS Command)
+### 1. Injection (SQL, NoSQL, OS Command)（注入）
 
 ```typescript
 // BAD: SQL injection via string concatenation
@@ -66,7 +66,7 @@ const user = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
 const user = await prisma.user.findUnique({ where: { id: userId } });
 ```
 
-### 2. Broken Authentication
+### 2. Broken Authentication（认证失效）
 
 ```typescript
 // Password hashing
@@ -90,7 +90,7 @@ app.use(session({
 }));
 ```
 
-### 3. Cross-Site Scripting (XSS)
+### 3. Cross-Site Scripting (XSS)（跨站脚本）
 
 ```typescript
 // BAD: Rendering user input as HTML
@@ -104,7 +104,7 @@ import DOMPurify from 'dompurify';
 const clean = DOMPurify.sanitize(userInput);
 ```
 
-### 4. Broken Access Control
+### 4. Broken Access Control（访问控制失效）
 
 ```typescript
 // Always check authorization, not just authentication
@@ -124,7 +124,7 @@ app.patch('/api/tasks/:id', authenticate, async (req, res) => {
 });
 ```
 
-### 5. Security Misconfiguration
+### 5. Security Misconfiguration（安全配置错误）
 
 ```typescript
 // Security headers (use helmet for Express)
@@ -149,7 +149,7 @@ app.use(cors({
 }));
 ```
 
-### 6. Sensitive Data Exposure
+### 6. Sensitive Data Exposure（敏感数据暴露）
 
 ```typescript
 // Never return sensitive fields in API responses
@@ -163,9 +163,9 @@ const API_KEY = process.env.STRIPE_API_KEY;
 if (!API_KEY) throw new Error('STRIPE_API_KEY not configured');
 ```
 
-## Input Validation Patterns
+## Input Validation Patterns（输入验证模式）
 
-### Schema Validation at Boundaries
+### Schema Validation at Boundaries（边界处的 Schema 验证）
 
 ```typescript
 import { z } from 'zod';
@@ -195,7 +195,7 @@ app.post('/api/tasks', async (req, res) => {
 });
 ```
 
-### File Upload Safety
+### File Upload Safety（文件上传安全）
 
 ```typescript
 // Restrict file types and sizes
@@ -213,9 +213,9 @@ function validateUpload(file: UploadedFile) {
 }
 ```
 
-## Triaging npm audit Results
+## Triaging npm audit Results（分诊 npm audit 结果）
 
-Not all audit findings require immediate action. Use this decision tree:
+并非所有 audit 发现都需要立即处理。使用这个决策树：
 
 ```
 npm audit reports a vulnerability
@@ -233,14 +233,14 @@ npm audit reports a vulnerability
     └── Track and fix during regular dependency updates
 ```
 
-**Key questions:**
-- Is the vulnerable function actually called in your code path?
-- Is the dependency a runtime dependency or dev-only?
-- Is the vulnerability exploitable given your deployment context (e.g., a server-side vulnerability in a client-only app)?
+**关键问题：**
+- 脆弱函数是否真的在你的代码路径中被调用？
+- 该依赖是运行时依赖，还是仅开发期依赖？
+- 在你的部署上下文中，这个漏洞是否可被利用（例如客户端-only 应用中的服务端漏洞）？
 
-When you defer a fix, document the reason and set a review date.
+延期修复时，记录原因并设置复审日期。
 
-## Rate Limiting
+## Rate Limiting（速率限制）
 
 ```typescript
 import rateLimit from 'express-rate-limit';
@@ -260,7 +260,7 @@ app.use('/api/auth/', rateLimit({
 }));
 ```
 
-## Secrets Management
+## Secrets Management（Secret 管理）
 
 ```
 .env files:
@@ -276,13 +276,13 @@ app.use('/api/auth/', rateLimit({
   *.key
 ```
 
-**Always check before committing:**
+**提交前始终检查：**
 ```bash
 # Check for accidentally staged secrets
 git diff --cached | grep -i "password\|secret\|api_key\|token"
 ```
 
-## Security Review Checklist
+## Security Review Checklist（安全评审清单）
 
 ```markdown
 ### Authentication
@@ -312,38 +312,38 @@ git diff --cached | grep -i "password\|secret\|api_key\|token"
 - [ ] Dependencies audited for vulnerabilities
 - [ ] Error messages don't expose internals
 ```
-## See Also
+## See Also（另请参阅）
 
-For detailed security checklists and pre-commit verification steps, see `references/security-checklist.md`.
+详细安全清单和 pre-commit 验证步骤见 `references/security-checklist.md`。
 
-## Common Rationalizations
+## Common Rationalizations（常见合理化）
 
-| Rationalization | Reality |
+| 常见合理化 | 现实 |
 |---|---|
-| "This is an internal tool, security doesn't matter" | Internal tools get compromised. Attackers target the weakest link. |
-| "We'll add security later" | Security retrofitting is 10x harder than building it in. Add it now. |
-| "No one would try to exploit this" | Automated scanners will find it. Security by obscurity is not security. |
-| "The framework handles security" | Frameworks provide tools, not guarantees. You still need to use them correctly. |
-| "It's just a prototype" | Prototypes become production. Security habits from day one. |
+| “这是内部工具，安全不重要” | 内部工具也会被攻陷。攻击者会瞄准最薄弱环节。 |
+| “我们之后再加安全” | 事后补安全比一开始内建难 10 倍。现在就加。 |
+| “没人会试图利用这个” | 自动扫描器会找到它。靠隐藏获得安全不是真安全。 |
+| “框架会处理安全” | 框架提供工具，不提供保证。你仍然必须正确使用它们。 |
+| “这只是原型” | 原型会变成生产。安全习惯从第一天开始。 |
 
-## Red Flags
+## Red Flags（危险信号）
 
-- User input passed directly to database queries, shell commands, or HTML rendering
-- Secrets in source code or commit history
-- API endpoints without authentication or authorization checks
-- Missing CORS configuration or wildcard (`*`) origins
-- No rate limiting on authentication endpoints
-- Stack traces or internal errors exposed to users
-- Dependencies with known critical vulnerabilities
+- 用户输入直接传给数据库查询、shell 命令或 HTML 渲染
+- secret 出现在源代码或提交历史中
+- API 端点缺少认证或授权检查
+- 缺少 CORS 配置或使用通配符（`*`）origin
+- 认证端点没有 rate limiting
+- stack trace 或内部错误暴露给用户
+- 依赖存在已知 critical 漏洞
 
-## Verification
+## Verification（验证）
 
-After implementing security-relevant code:
+实现安全相关代码后：
 
-- [ ] `npm audit` shows no critical or high vulnerabilities
-- [ ] No secrets in source code or git history
-- [ ] All user input validated at system boundaries
-- [ ] Authentication and authorization checked on every protected endpoint
-- [ ] Security headers present in response (check with browser DevTools)
-- [ ] Error responses don't expose internal details
-- [ ] Rate limiting active on auth endpoints
+- [ ] `npm audit` 没有 critical 或 high 漏洞
+- [ ] 源代码或 git 历史中没有 secret
+- [ ] 所有用户输入都在系统边界验证
+- [ ] 每个受保护端点都检查认证和授权
+- [ ] 响应中存在安全 header（用浏览器 DevTools 检查）
+- [ ] 错误响应不暴露内部详情
+- [ ] 认证端点启用了 rate limiting

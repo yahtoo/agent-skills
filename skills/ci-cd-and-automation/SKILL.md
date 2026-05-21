@@ -1,29 +1,29 @@
 ---
 name: ci-cd-and-automation
-description: Automates CI/CD pipeline setup. Use when setting up or modifying build and deployment pipelines. Use when you need to automate quality gates, configure test runners in CI, or establish deployment strategies.
+description: 自动化 CI/CD 流水线设置。Use when setting up or modifying build and deployment pipelines. Use when you need to automate quality gates, configure test runners in CI, or establish deployment strategies.
 ---
 
 # CI/CD and Automation
 
-## Overview
+## Overview（概览）
 
-Automate quality gates so that no change reaches production without passing tests, lint, type checking, and build. CI/CD is the enforcement mechanism for every other skill — it catches what humans and agents miss, and it does so consistently on every single change.
+自动化质量门，确保任何变更在到达生产前都通过测试、lint、类型检查和构建。CI/CD 是其他所有 skill 的执行机制：它能捕获人和代理遗漏的问题，并在每一次变更上保持一致。
 
-**Shift Left:** Catch problems as early in the pipeline as possible. A bug caught in linting costs minutes; the same bug caught in production costs hours. Move checks upstream — static analysis before tests, tests before staging, staging before production.
+**Shift Left：** 尽可能早地在流水线中发现问题。lint 阶段发现的 bug 成本是几分钟；同一个 bug 到生产中才发现，成本就是几小时。把检查前移：静态分析先于测试，测试先于 staging，staging 先于生产。
 
-**Faster is Safer:** Smaller batches and more frequent releases reduce risk, not increase it. A deployment with 3 changes is easier to debug than one with 30. Frequent releases build confidence in the release process itself.
+**Faster is Safer：** 更小批次和更频繁发布会降低风险，而不是增加风险。包含 3 个变更的部署比包含 30 个变更的部署更容易调试。频繁发布也会增强团队对发布流程本身的信心。
 
-## When to Use
+## When to Use（何时使用）
 
-- Setting up a new project's CI pipeline
-- Adding or modifying automated checks
-- Configuring deployment pipelines
-- When a change should trigger automated verification
-- Debugging CI failures
+- 设置新项目的 CI pipeline
+- 添加或修改自动化检查
+- 配置部署流水线
+- 当某个变更应该触发自动验证
+- 调试 CI failures
 
-## The Quality Gate Pipeline
+## The Quality Gate Pipeline（质量门流水线）
 
-Every change goes through these gates before merge:
+每个变更在合并前都经过这些 gates：
 
 ```
 Pull Request Opened
@@ -51,11 +51,11 @@ Pull Request Opened
   Ready for review
 ```
 
-**No gate can be skipped.** If lint fails, fix lint — don't disable the rule. If a test fails, fix the code — don't skip the test.
+**任何 gate 都不能跳过。** 如果 lint 失败，就修 lint，不要禁用规则。如果测试失败，就修代码，不要跳过测试。
 
-## GitHub Actions Configuration
+## GitHub Actions Configuration（GitHub Actions 配置）
 
-### Basic CI Pipeline
+### Basic CI Pipeline（基础 CI 流水线）
 
 ```yaml
 # .github/workflows/ci.yml
@@ -97,7 +97,7 @@ jobs:
         run: npm audit --audit-level=high
 ```
 
-### With Database Integration Tests
+### With Database Integration Tests（带数据库集成测试）
 
 ```yaml
   integration:
@@ -134,9 +134,9 @@ jobs:
           DATABASE_URL: postgresql://ci_user:${{ secrets.CI_DB_PASSWORD }}@localhost:5432/testdb
 ```
 
-> **Note:** Even for CI-only test databases, use GitHub Secrets for credentials rather than hardcoding values. This builds good habits and prevents accidental reuse of test credentials in other contexts.
+> **注意：** 即使是仅用于 CI 的测试数据库，也要用 GitHub Secrets 存储凭据，而不是硬编码。这会建立好习惯，并防止测试凭据被意外复用到其他场景。
 
-### E2E Tests
+### E2E Tests（E2E 测试）
 
 ```yaml
   e2e:
@@ -161,9 +161,9 @@ jobs:
           path: playwright-report/
 ```
 
-## Feeding CI Failures Back to Agents
+## Feeding CI Failures Back to Agents（把 CI 失败反馈给代理）
 
-The power of CI with AI agents is the feedback loop. When CI fails:
+CI 与 AI 代理结合的力量来自反馈循环。当 CI 失败：
 
 ```
 CI fails
@@ -181,7 +181,7 @@ Fix the issue and verify locally before pushing again."
 Agent fixes → pushes → CI runs again
 ```
 
-**Key patterns:**
+**关键模式：**
 
 ```
 Lint failure → Agent runs `npm run lint --fix` and commits
@@ -190,11 +190,11 @@ Test failure → Agent follows debugging-and-error-recovery skill
 Build error → Agent checks config and dependencies
 ```
 
-## Deployment Strategies
+## Deployment Strategies（部署策略）
 
-### Preview Deployments
+### Preview Deployments（预览部署）
 
-Every PR gets a preview deployment for manual testing:
+每个 PR 都获得一个 preview deployment，用于人工测试：
 
 ```yaml
 # Deploy preview on PR (Vercel/Netlify/etc.)
@@ -207,14 +207,14 @@ deploy-preview:
       run: npx vercel --token=${{ secrets.VERCEL_TOKEN }}
 ```
 
-### Feature Flags
+### Feature Flags（功能开关）
 
-Feature flags decouple deployment from release. Deploy incomplete or risky features behind flags so you can:
+Feature flags 将部署和发布解耦。把未完成或高风险功能放在 flags 后部署，这样你可以：
 
-- **Ship code without enabling it.** Merge to main early, enable when ready.
-- **Roll back without redeploying.** Disable the flag instead of reverting code.
-- **Canary new features.** Enable for 1% of users, then 10%, then 100%.
-- **Run A/B tests.** Compare behavior with and without the feature.
+- **Ship code without enabling it.** 提前合并到 main，但等准备好后再启用。
+- **Roll back without redeploying.** 通过关闭 flag 回滚，而不是 revert 代码。
+- **Canary new features.** 先对 1% 用户启用，再到 10%，最后 100%。
+- **Run A/B tests.** 对比启用和未启用功能时的行为。
 
 ```typescript
 // Simple feature flag pattern
@@ -224,9 +224,9 @@ if (featureFlags.isEnabled('new-checkout-flow', { userId })) {
 return renderLegacyCheckout();
 ```
 
-**Flag lifecycle:** Create → Enable for testing → Canary → Full rollout → Remove the flag and dead code. Flags that live forever become technical debt — set a cleanup date when you create them.
+**Flag lifecycle：** Create → Enable for testing → Canary → Full rollout → Remove the flag and dead code。永久存在的 flags 会变成技术债；创建时就设定清理日期。
 
-### Staged Rollouts
+### Staged Rollouts（分阶段发布）
 
 ```
 PR merged to main
@@ -244,9 +244,9 @@ PR merged to main
     └── Clean → Done
 ```
 
-### Rollback Plan
+### Rollback Plan（回滚计划）
 
-Every deployment should be reversible:
+每次部署都应该可逆：
 
 ```yaml
 # Manual rollback workflow
@@ -268,7 +268,7 @@ jobs:
           npx vercel rollback ${{ inputs.version }}
 ```
 
-## Environment Management
+## Environment Management（环境管理）
 
 ```
 .env.example       → Committed (template for developers)
@@ -278,9 +278,9 @@ CI secrets          → Stored in GitHub Secrets / vault
 Production secrets  → Stored in deployment platform / vault
 ```
 
-CI should never have production secrets. Use separate secrets for CI testing.
+CI 永远不应该拥有生产 secrets。为 CI 测试使用独立 secrets。
 
-## Automation Beyond CI
+## Automation Beyond CI（CI 之外的自动化）
 
 ### Dependabot / Renovate
 
@@ -295,20 +295,20 @@ updates:
     open-pull-requests-limit: 5
 ```
 
-### Build Cop Role
+### Build Cop Role（Build Cop 角色）
 
-Designate someone responsible for keeping CI green. When the build breaks, the Build Cop's job is to fix or revert — not the person whose change caused the break. This prevents broken builds from accumulating while everyone assumes someone else will fix it.
+指定一个人负责保持 CI 绿色。当 build 失败时，Build Cop 的职责是修复或回滚，而不是由导致失败的那个人负责。这可以防止 broken builds 积累，因为每个人都以为别人会修。
 
-### PR Checks
+### PR Checks（PR 检查）
 
-- **Required reviews:** At least 1 approval before merge
-- **Required status checks:** CI must pass before merge
-- **Branch protection:** No force-pushes to main
-- **Auto-merge:** If all checks pass and approved, merge automatically
+- **Required reviews：** 合并前至少 1 个 approval
+- **Required status checks：** 合并前 CI 必须通过
+- **Branch protection：** 禁止向 main force-push
+- **Auto-merge：** 所有检查通过且已 approval 后自动合并
 
-## CI Optimization
+## CI Optimization（CI 优化）
 
-When the pipeline exceeds 10 minutes, apply these strategies in order of impact:
+当流水线超过 10 分钟时，按影响从高到低应用这些策略：
 
 ```
 Slow CI pipeline?
@@ -326,7 +326,7 @@ Slow CI pipeline?
     └── GitHub-hosted larger runners or self-hosted for CPU-heavy builds
 ```
 
-**Example: caching and parallelism**
+**示例：缓存与并行**
 ```yaml
 jobs:
   lint:
@@ -357,34 +357,34 @@ jobs:
       - run: npm test -- --coverage
 ```
 
-## Common Rationalizations
+## Common Rationalizations（常见合理化）
 
 | Rationalization | Reality |
 |---|---|
-| "CI is too slow" | Optimize the pipeline (see CI Optimization below), don't skip it. A 5-minute pipeline prevents hours of debugging. |
-| "This change is trivial, skip CI" | Trivial changes break builds. CI is fast for trivial changes anyway. |
-| "The test is flaky, just re-run" | Flaky tests mask real bugs and waste everyone's time. Fix the flakiness. |
-| "We'll add CI later" | Projects without CI accumulate broken states. Set it up on day one. |
-| "Manual testing is enough" | Manual testing doesn't scale and isn't repeatable. Automate what you can. |
+| "CI is too slow" | 优化流水线（见 CI Optimization），不要跳过它。5 分钟流水线可以避免数小时调试。 |
+| "This change is trivial, skip CI" | 小变更也会破坏 build。CI 对小变更本来也很快。 |
+| "The test is flaky, just re-run" | Flaky tests 会掩盖真实 bug，并浪费所有人的时间。修复不稳定性。 |
+| "We'll add CI later" | 没有 CI 的项目会积累 broken states。第一天就设置。 |
+| "Manual testing is enough" | 手工测试不可扩展，也不可重复。能自动化的都自动化。 |
 
-## Red Flags
+## Red Flags（危险信号）
 
-- No CI pipeline in the project
-- CI failures ignored or silenced
-- Tests disabled in CI to make the pipeline pass
-- Production deploys without staging verification
-- No rollback mechanism
-- Secrets stored in code or CI config files (not secrets manager)
-- Long CI times with no optimization effort
+- 项目没有 CI pipeline
+- CI failures 被忽略或静默处理
+- 为了让 pipeline 通过而在 CI 中禁用测试
+- 生产部署没有 staging 验证
+- 没有 rollback mechanism
+- Secrets 存在代码或 CI 配置文件中，而不是 secrets manager
+- CI 时间很长却没有优化努力
 
-## Verification
+## Verification（验证）
 
-After setting up or modifying CI:
+设置或修改 CI 后：
 
-- [ ] All quality gates are present (lint, types, tests, build, audit)
-- [ ] Pipeline runs on every PR and push to main
-- [ ] Failures block merge (branch protection configured)
-- [ ] CI results feed back into the development loop
-- [ ] Secrets are stored in the secrets manager, not in code
-- [ ] Deployment has a rollback mechanism
-- [ ] Pipeline runs in under 10 minutes for the test suite
+- [ ] 所有 quality gates 都存在（lint、types、tests、build、audit）
+- [ ] Pipeline 在每个 PR 和 push to main 上运行
+- [ ] Failures 会阻止合并（已配置 branch protection）
+- [ ] CI 结果反馈回开发循环
+- [ ] Secrets 存储在 secrets manager 中，而不是代码里
+- [ ] 部署有 rollback mechanism
+- [ ] 测试套件的 pipeline 在 10 分钟内完成

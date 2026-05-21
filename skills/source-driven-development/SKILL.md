@@ -1,30 +1,30 @@
 ---
 name: source-driven-development
-description: Grounds every implementation decision in official documentation. Use when you want authoritative, source-cited code free from outdated patterns. Use when building with any framework or library where correctness matters.
+description: 用官方文档支撑每个实现决策。Use when 需要权威、可引用、避免过时模式的代码；Use when 使用任何框架或库且正确性很重要。
 ---
 
 # Source-Driven Development
 
-## Overview
+## Overview（概览）
 
-Every framework-specific code decision must be backed by official documentation. Don't implement from memory — verify, cite, and let the user see your sources. Training data goes stale, APIs get deprecated, best practices evolve. This skill ensures the user gets code they can trust because every pattern traces back to an authoritative source they can check.
+每个框架相关的代码决策都必须由官方文档支撑。不要凭记忆实现，要验证、引用，并让用户看到来源。训练数据会过时，API 会废弃，最佳实践会演进。这个 skill 确保用户得到可信代码，因为每个模式都能追溯到可核查的权威来源。
 
-## When to Use
+## When to Use（何时使用）
 
-- The user wants code that follows current best practices for a given framework
-- Building boilerplate, starter code, or patterns that will be copied across a project
-- The user explicitly asks for documented, verified, or "correct" implementation
-- Implementing features where the framework's recommended approach matters (forms, routing, data fetching, state management, auth)
-- Reviewing or improving code that uses framework-specific patterns
-- Any time you are about to write framework-specific code from memory
+- 用户希望代码遵循某个框架的当前最佳实践
+- 构建会在项目中反复复制的样板代码、starter code 或模式
+- 用户明确要求有文档依据、已验证或“正确”的实现
+- 实现框架推荐做法很重要的功能（表单、路由、数据获取、状态管理、认证）
+- 审查或改进使用框架特定模式的代码
+- 任何你准备凭记忆编写框架特定代码的时候
 
-**When NOT to use:**
+**何时不要使用：**
 
-- Correctness does not depend on a specific version (renaming variables, fixing typos, moving files)
-- Pure logic that works the same across all versions (loops, conditionals, data structures)
-- The user explicitly wants speed over verification ("just do it quickly")
+- 正确性不依赖具体版本（重命名变量、修正拼写、移动文件）
+- 跨版本行为一致的纯逻辑（循环、条件、数据结构）
+- 用户明确要求速度优先于验证（“just do it quickly”）
 
-## The Process
+## The Process（流程）
 
 ```
 DETECT ──→ FETCH ──→ IMPLEMENT ──→ CITE
@@ -35,9 +35,9 @@ DETECT ──→ FETCH ──→ IMPLEMENT ──→ CITE
             docs       patterns
 ```
 
-### Step 1: Detect Stack and Versions
+### Step 1: Detect Stack and Versions（识别技术栈和版本）
 
-Read the project's dependency file to identify exact versions:
+读取项目的依赖文件，确定精确版本：
 
 ```
 package.json    → Node/React/Vue/Angular/Svelte
@@ -48,7 +48,7 @@ Cargo.toml      → Rust
 Gemfile         → Ruby/Rails
 ```
 
-State what you found explicitly:
+明确说明你发现的内容：
 
 ```
 STACK DETECTED:
@@ -58,29 +58,29 @@ STACK DETECTED:
 → Fetching official docs for the relevant patterns.
 ```
 
-If versions are missing or ambiguous, **ask the user**. Don't guess — the version determines which patterns are correct.
+如果版本缺失或含糊，**询问用户**。不要猜测，版本决定了哪些模式才是正确的。
 
-### Step 2: Fetch Official Documentation
+### Step 2: Fetch Official Documentation（获取官方文档）
 
-Fetch the specific documentation page for the feature you're implementing. Not the homepage, not the full docs — the relevant page.
+获取你要实现的功能对应的具体文档页面。不是首页，不是整站文档，而是相关页面。
 
-**Source hierarchy (in order of authority):**
+**来源权威性层级（按顺序）：**
 
-| Priority | Source | Example |
+| 优先级 | 来源 | 示例 |
 |----------|--------|---------|
-| 1 | Official documentation | react.dev, docs.djangoproject.com, symfony.com/doc |
-| 2 | Official blog / changelog | react.dev/blog, nextjs.org/blog |
-| 3 | Web standards references | MDN, web.dev, html.spec.whatwg.org |
-| 4 | Browser/runtime compatibility | caniuse.com, node.green |
+| 1 | 官方文档 | react.dev, docs.djangoproject.com, symfony.com/doc |
+| 2 | 官方博客 / changelog | react.dev/blog, nextjs.org/blog |
+| 3 | Web 标准参考 | MDN, web.dev, html.spec.whatwg.org |
+| 4 | 浏览器 / 运行时兼容性 | caniuse.com, node.green |
 
-**Not authoritative — never cite as primary sources:**
+**不具备权威性，不要作为主要来源引用：**
 
 - Stack Overflow answers
-- Blog posts or tutorials (even popular ones)
-- AI-generated documentation or summaries
-- Your own training data (that is the whole point — verify it)
+- 博客文章或教程（即使很流行）
+- AI 生成的文档或摘要
+- 你自己的训练数据（这正是需要验证的原因）
 
-**Be precise with what you fetch:**
+**精确获取需要的内容：**
 
 ```
 BAD:  Fetch the React homepage
@@ -90,20 +90,20 @@ BAD:  Search "django authentication best practices"
 GOOD: Fetch docs.djangoproject.com/en/6.0/topics/auth/
 ```
 
-After fetching, extract the key patterns and note any deprecation warnings or migration guidance.
+获取后，提取关键模式，并记录任何废弃警告或迁移指引。
 
-When official sources conflict with each other (e.g. a migration guide contradicts the API reference), surface the discrepancy to the user and verify which pattern actually works against the detected version.
+当官方来源互相冲突时（例如迁移指南与 API reference 矛盾），向用户说明分歧，并针对检测到的版本验证哪个模式实际可用。
 
-### Step 3: Implement Following Documented Patterns
+### Step 3: Implement Following Documented Patterns（按文档模式实现）
 
-Write code that matches what the documentation shows:
+编写与文档示例一致的代码：
 
-- Use the API signatures from the docs, not from memory
-- If the docs show a new way to do something, use the new way
-- If the docs deprecate a pattern, don't use the deprecated version
-- If the docs don't cover something, flag it as unverified
+- 使用文档中的 API 签名，不要凭记忆
+- 如果文档展示了新做法，使用新做法
+- 如果文档废弃了某个模式，不要使用废弃版本
+- 如果文档没有覆盖某个内容，将其标为未验证
 
-**When docs conflict with existing project code:**
+**当文档与现有项目代码冲突时：**
 
 ```
 CONFLICT DETECTED:
@@ -117,13 +117,13 @@ B) Match existing code (useState) — consistent with codebase
 → Which approach do you prefer?
 ```
 
-Surface the conflict. Don't silently pick one.
+暴露冲突，不要静默选择。
 
-### Step 4: Cite Your Sources
+### Step 4: Cite Your Sources（引用来源）
 
-Every framework-specific pattern gets a citation. The user must be able to verify every decision.
+每个框架特定模式都要有引用。用户必须能验证每个决策。
 
-**In code comments:**
+**代码注释中：**
 
 ```typescript
 // React 19 form handling with useActionState
@@ -131,7 +131,7 @@ Every framework-specific pattern gets a citation. The user must be able to verif
 const [state, formAction, isPending] = useActionState(submitOrder, initialState);
 ```
 
-**In conversation:**
+**对话中：**
 
 ```
 I'm using useActionState instead of manual useState for the
@@ -143,13 +143,13 @@ Source: https://react.dev/blog/2024/12/05/react-19#actions
 pending states automatically"
 ```
 
-**Citation rules:**
+**引用规则：**
 
-- Full URLs, not shortened
-- Prefer deep links with anchors where possible (e.g. `/useActionState#usage` over `/useActionState`) — anchors survive doc restructuring better than top-level pages
-- Quote the relevant passage when it supports a non-obvious decision
-- Include browser/runtime support data when recommending platform features
-- If you cannot find documentation for a pattern, say so explicitly:
+- 使用完整 URL，不用短链接
+- 尽可能使用带锚点的深链接（例如 `/useActionState#usage` 优于 `/useActionState`），锚点比顶层页面更能承受文档重组
+- 引用能支撑非显而易见决策的相关段落
+- 推荐平台特性时包含浏览器 / 运行时支持数据
+- 如果找不到某个模式的文档，明确说明：
 
 ```
 UNVERIFIED: I could not find official documentation for this
@@ -157,38 +157,38 @@ pattern. This is based on training data and may be outdated.
 Verify before using in production.
 ```
 
-Honesty about what you couldn't verify is more valuable than false confidence.
+诚实说明无法验证的内容，比虚假的确定性更有价值。
 
-## Common Rationalizations
+## Common Rationalizations（常见合理化）
 
-| Rationalization | Reality |
+| 合理化 | 现实 |
 |---|---|
-| "I'm confident about this API" | Confidence is not evidence. Training data contains outdated patterns that look correct but break against current versions. Verify. |
-| "Fetching docs wastes tokens" | Hallucinating an API wastes more. The user debugs for an hour, then discovers the function signature changed. One fetch prevents hours of rework. |
-| "The docs won't have what I need" | If the docs don't cover it, that's valuable information — the pattern may not be officially recommended. |
-| "I'll just mention it might be outdated" | A disclaimer doesn't help. Either verify and cite, or clearly flag it as unverified. Hedging is the worst option. |
-| "This is a simple task, no need to check" | Simple tasks with wrong patterns become templates. The user copies your deprecated form handler into ten components before discovering the modern approach exists. |
+| "I'm confident about this API" | 信心不是证据。训练数据包含看起来正确、但在当前版本会失败的过时模式。去验证。 |
+| "Fetching docs wastes tokens" | 幻觉出一个 API 更浪费。用户调试一小时后才发现函数签名变了。一次获取文档能避免数小时返工。 |
+| "The docs won't have what I need" | 如果文档没有覆盖，这本身就是有价值的信息，说明该模式可能不是官方推荐。 |
+| "I'll just mention it might be outdated" | 免责声明没有帮助。要么验证并引用，要么清楚标为未验证。含糊其辞是最差选项。 |
+| "This is a simple task, no need to check" | 简单任务中的错误模式会变成模板。用户可能先把你的废弃表单处理器复制到十个组件，之后才发现现代做法。 |
 
-## Red Flags
+## Red Flags（危险信号）
 
-- Writing framework-specific code without checking the docs for that version
-- Using "I believe" or "I think" about an API instead of citing the source
-- Implementing a pattern without knowing which version it applies to
-- Citing Stack Overflow or blog posts instead of official documentation
-- Using deprecated APIs because they appear in training data
-- Not reading `package.json` / dependency files before implementing
-- Delivering code without source citations for framework-specific decisions
-- Fetching an entire docs site when only one page is relevant
+- 没有检查对应版本文档就编写框架特定代码
+- 对 API 使用 "I believe" 或 "I think"，而不是引用来源
+- 不知道某个模式适用于哪个版本就实现它
+- 引用 Stack Overflow 或博客文章，而不是官方文档
+- 因为训练数据中出现过就使用废弃 API
+- 实现前没有读取 `package.json` / 依赖文件
+- 交付框架特定决策时没有来源引用
+- 只需要一个相关页面，却获取整个文档站点
 
-## Verification
+## Verification（验证）
 
-After implementing with source-driven development:
+使用 source-driven development 完成实现后：
 
-- [ ] Framework and library versions were identified from the dependency file
-- [ ] Official documentation was fetched for framework-specific patterns
-- [ ] All sources are official documentation, not blog posts or training data
-- [ ] Code follows the patterns shown in the current version's documentation
-- [ ] Non-trivial decisions include source citations with full URLs
-- [ ] No deprecated APIs are used (checked against migration guides)
-- [ ] Conflicts between docs and existing code were surfaced to the user
-- [ ] Anything that could not be verified is explicitly flagged as unverified
+- [ ] 已从依赖文件识别框架和库版本
+- [ ] 已为框架特定模式获取官方文档
+- [ ] 所有来源都是官方文档，而不是博客文章或训练数据
+- [ ] 代码遵循当前版本文档展示的模式
+- [ ] 非平凡决策包含带完整 URL 的来源引用
+- [ ] 没有使用废弃 API（已对照迁移指南检查）
+- [ ] 已向用户说明文档与现有代码之间的冲突
+- [ ] 任何无法验证的内容都已明确标为未验证

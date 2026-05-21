@@ -1,113 +1,116 @@
-# Refinement & Evaluation Criteria
+# Refinement & Evaluation Criteria（打磨与评估标准）
 
-Use this rubric during Phase 2 (Evaluate & Converge) to stress-test idea directions. Not every criterion applies to every idea — use judgment about which dimensions matter most for the specific context.
+在 Phase 2（Evaluate & Converge）中使用此 rubric 对想法方向进行压力测试。不是每个标准都适用于每个想法；根据具体上下文判断哪些维度最重要。
 
-## Core Evaluation Dimensions
+## Core Evaluation Dimensions（核心评估维度）
 
-### 1. User Value
+### 1. User Value（用户价值）
 
-The most important dimension. If the value isn't clear, nothing else matters.
+最重要的维度。如果价值不清楚，其他都不重要。
 
-**Painkiller vs. Vitamin:**
-- **Painkiller:** Solves an acute, frequent problem. Users will actively seek this out. They'll switch from their current solution. Signs: people describe the problem with emotion, they've built workarounds, they'll pay for a solution.
-- **Vitamin:** Nice to have. Makes something marginally better. Users won't go out of their way. Signs: people nod politely, say "that's cool," then don't change behavior.
+**Painkiller vs. Vitamin（止痛药 vs. 维生素）：**
+- **Painkiller：** 解决急迫且频繁的问题。用户会主动寻找它。他们会从当前方案切换过来。信号：人们带着情绪描述问题、已经构建 workaround、愿意为解决方案付费。
+- **Vitamin：** 可有可无。让某事略微变好。用户不会特意去使用。信号：人们礼貌点头、说 “that's cool”，然后行为没有改变。
 
-**Questions to ask:**
-- Can you name 3 specific people who have this problem right now?
-- What are they doing today instead? (The real competitor is always the current workaround.)
-- Would they switch from their current approach? What would make them switch?
-- How often do they encounter this problem? (Daily problems > monthly problems)
-- Is this a "pull" problem (users are asking for this) or a "push" problem (you think they should want this)?
+**Questions to ask（要问的问题）：**
+- 你能说出 3 个现在就有这个问题的具体人吗？
+- 他们今天用什么替代方案？（真正的竞争者永远是当前 workaround。）
+- 他们会从当前方式切换过来吗？什么会让他们切换？
+- 他们多频繁遇到这个问题？（每日问题 > 每月问题）
+- 这是一个 “pull” 问题（用户在要求它），还是 “push” 问题（你认为他们应该想要它）？
 
-**Red flags:**
-- "Everyone could use this" — if you can't name a specific user, the value isn't clear
-- "It's like X but better" — marginal improvements rarely drive adoption
-- The problem is real but rare — high intensity but low frequency rarely justifies a product
+**Red flags（危险信号）：**
+- “Everyone could use this”：如果你无法命名具体用户，价值就不清楚
+- “It's like X but better”：边际改进很少驱动采用
+- 问题真实但罕见：高强度但低频率，很少足以支撑产品
 
-### 2. Feasibility
+### 2. Feasibility（可行性）
 
-Can you actually build this? Not just technically, but practically.
+你真的能构建它吗？不仅是技术上，而是实践上。
 
-**Technical feasibility:**
-- Does the core technology exist and work reliably?
-- What's the hardest technical problem? Is it a known-hard problem or a novel one?
-- Are there dependencies on third parties, APIs, or data sources you don't control?
-- What's the minimum technical stack needed? (If the answer is "a lot," that's a signal.)
+**Technical feasibility（技术可行性）：**
+- 核心技术是否存在且可靠？
+- 最难的技术问题是什么？它是已知难题还是新问题？
+- 是否依赖你无法控制的第三方、API 或数据源？
+- 所需的最小技术栈是什么？（如果答案是 “很多”，这就是信号。）
 
-**Resource feasibility:**
-- What's the minimum team/effort to build an MVP?
-- Does it require specialized expertise you don't have?
-- Are there regulatory, legal, or compliance requirements?
+**Resource feasibility（资源可行性）：**
+- 构建 MVP 所需的最小团队/工作量是什么？
+- 是否需要你没有的专业能力？
+- 是否存在监管、法律或合规要求？
 
-**Time-to-value:**
-- How quickly can you get something in front of users?
-- Is there a version that delivers value in days/weeks, not months?
-- What's the critical path? What has to happen first?
+**Time-to-value（价值实现时间）：**
+- 多快能把东西放到用户面前？
+- 是否存在一个能在数天/数周，而不是数月内交付价值的版本？
+- critical path 是什么？必须先发生什么？
 
-**Red flags:**
-- "We just need to solve [very hard research problem] first"
-- Multiple dependencies that all need to work simultaneously
-- MVP still requires months of work — likely not minimal enough
+**Red flags（危险信号）：**
+- “We just need to solve [very hard research problem] first”
+- 多个依赖必须同时工作
+- MVP 仍需要数月工作，说明它很可能还不够 minimal
 
-### 3. Differentiation
+### 3. Differentiation（差异化）
 
-What makes this genuinely different? Not better — *different*.
+它真正不同在哪里？不是更好，而是 *不同*。
 
-**Questions to ask:**
-- If a user described this to a friend, what would they say? Is that description compelling?
-- What's the one thing this does that nothing else does? (If you can't name one, that's a problem.)
-- Is this differentiation durable? Can a competitor copy it in a week?
-- Is the difference something users actually care about, or just something builders find interesting?
+**Questions to ask（要问的问题）：**
+- 如果用户向朋友描述它，他们会怎么说？这个描述有吸引力吗？
+- 这个东西做了什么其他东西都没做的事？（如果说不出来，就是问题。）
+- 这种差异化是否持久？竞争者能在一周内复制吗？
+- 这个差异是用户真正关心的，还是只是构建者觉得有趣？
 
-**Types of differentiation (strongest to weakest):**
-1. **New capability:** Does something that was previously impossible
-2. **10x improvement:** So much better on a key dimension that it changes behavior
-3. **New audience:** Brings an existing capability to people who were excluded
-4. **New context:** Works in a situation where existing solutions fail
-5. **Better UX:** Same capability, dramatically simpler experience
-6. **Cheaper:** Same thing, lower cost (weakest — easily competed away)
+**Types of differentiation (strongest to weakest)（差异化类型，从强到弱）：**
+1. **New capability：** 做到以前不可能的事
+2. **10x improvement：** 在关键维度上好到足以改变行为
+3. **New audience：** 把现有能力带给过去被排除的人
+4. **New context：** 在现有方案失效的场景中工作
+5. **Better UX：** 同样能力，但体验极大简化
+6. **Cheaper：** 同样东西，成本更低（最弱，容易被竞争掉）
 
-**Red flags:**
-- Differentiation is entirely about technology, not user experience
-- "We're faster/cheaper/prettier" without a structural reason why
-- The feature that differentiates is not the feature users care most about
+**Red flags（危险信号）：**
+- 差异化完全关于技术，而不是用户体验
+- “We're faster/cheaper/prettier”，却没有结构性原因说明为什么
+- 用来差异化的功能，并不是用户最关心的功能
 
-## Assumption Audit
+## Assumption Audit（假设审计）
 
-For every idea direction, explicitly list assumptions in three categories:
+对每个想法方向，都要把假设明确列入三类：
 
-### Must Be True (Dealbreakers)
-Assumptions that, if wrong, kill the idea entirely. These need validation before building.
+### Must Be True (Dealbreakers)（必须为真，否决项）
 
-Example: "Users will share their data with us" — if they won't, the entire product doesn't work.
+如果错误就会完全杀死想法的假设。这些需要在构建前验证。
 
-### Should Be True (Important)
-Assumptions that significantly impact success but don't kill the idea. You can adjust the approach if these are wrong.
+示例：“Users will share their data with us”——如果他们不愿意，整个产品就无法工作。
 
-Example: "Users prefer self-serve over talking to a person" — if wrong, you need a different go-to-market, but the core product can still work.
+### Should Be True (Important)（应该为真，重要项）
 
-### Might Be True (Nice to Have)
-Assumptions about secondary features or optimizations. Don't validate these until the core is proven.
+显著影响成功但不会杀死想法的假设。如果这些错了，可以调整方法。
 
-Example: "Users will want to share their results with teammates" — a growth feature, not a core value proposition.
+示例：“Users prefer self-serve over talking to a person”——如果错了，你需要不同的 go-to-market，但核心产品仍然可以工作。
 
-## Decision Framework
+### Might Be True (Nice to Have)（可能为真，加分项）
 
-When choosing between directions, rank on this matrix:
+关于次要功能或优化的假设。在核心被证明之前，不要验证这些。
+
+示例：“Users will want to share their results with teammates”——这是增长功能，不是核心价值主张。
+
+## Decision Framework（决策框架）
+
+在方向之间选择时，用这个矩阵排序：
 
 |                    | High Feasibility | Low Feasibility |
 |--------------------|-------------------|-----------------|
 | **High Value**     | Do this first     | Worth the risk   |
 | **Low Value**      | Only if trivial   | Don't do this    |
 
-Then use differentiation as the tiebreaker between options in the same quadrant.
+然后使用 differentiation 作为同一象限内选项的 tiebreaker。
 
-## MVP Scoping Principles
+## MVP Scoping Principles（MVP 定范围原则）
 
-When defining MVP scope for the chosen direction:
+为选定方向定义 MVP 范围时：
 
-1. **One job, done well.** The MVP should nail exactly one user job. Not three jobs done partially.
-2. **The riskiest assumption first.** The MVP's primary purpose is to test the assumption most likely to be wrong.
-3. **Time-box, not feature-list.** "What can we build and test in [timeframe]?" is better than "What features do we need?"
-4. **The 'Not Doing' list is mandatory.** Explicitly name what you're cutting and why. This prevents scope creep and forces honest prioritization.
-5. **If it's not embarrassing, you waited too long.** The first version should feel incomplete to the builder. If it doesn't, you over-built.
+1. **One job, done well（一个任务，做好它）。** MVP 应该精准完成一个用户任务，而不是三个任务各做一部分。
+2. **The riskiest assumption first（最有风险的假设优先）。** MVP 的主要目的，是测试最可能错误的假设。
+3. **Time-box, not feature-list（按时间盒，而不是功能清单）。** “What can we build and test in [timeframe]?” 比 “What features do we need?” 更好。
+4. **The 'Not Doing' list is mandatory（`Not Doing` list 是强制项）。** 明确说出你砍掉什么以及为什么。这能防止范围蔓延，并迫使诚实排序。
+5. **If it's not embarrassing, you waited too long（如果不尴尬，说明你等太久了）。** 第一个版本应该让构建者觉得不完整。如果没有这种感觉，你就过度构建了。

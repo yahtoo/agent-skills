@@ -1,57 +1,57 @@
-# Security Checklist
+# 安全检查清单
 
-Quick reference for web application security. Use alongside the `security-and-hardening` skill.
+Web 应用安全的快速参考。请配合 `security-and-hardening` skill 使用。
 
-## Table of Contents
+## 目录
 
-- [Pre-Commit Checks](#pre-commit-checks)
+- [提交前检查](#提交前检查)
 - [Authentication](#authentication)
 - [Authorization](#authorization)
-- [Input Validation](#input-validation)
-- [Security Headers](#security-headers)
-- [CORS Configuration](#cors-configuration)
-- [Data Protection](#data-protection)
-- [Dependency Security](#dependency-security)
-- [Error Handling](#error-handling)
-- [OWASP Top 10 Quick Reference](#owasp-top-10-quick-reference)
+- [输入验证](#输入验证)
+- [安全响应头](#安全响应头)
+- [CORS 配置](#cors-配置)
+- [数据保护](#数据保护)
+- [依赖安全](#依赖安全)
+- [错误处理](#错误处理)
+- [OWASP Top 10 快速参考](#owasp-top-10-快速参考)
 
-## Pre-Commit Checks
+## 提交前检查
 
-- [ ] No secrets in code (`git diff --cached | grep -i "password\|secret\|api_key\|token"`)
-- [ ] `.gitignore` covers: `.env`, `.env.local`, `*.pem`, `*.key`
-- [ ] `.env.example` uses placeholder values (not real secrets)
+- [ ] 代码中没有 secrets（`git diff --cached | grep -i "password\|secret\|api_key\|token"`）
+- [ ] `.gitignore` 覆盖：`.env`、`.env.local`、`*.pem`、`*.key`
+- [ ] `.env.example` 使用占位值（不是真实 secrets）
 
 ## Authentication
 
-- [ ] Passwords hashed with bcrypt (≥12 rounds), scrypt, or argon2
-- [ ] Session cookies: `httpOnly`, `secure`, `sameSite: 'lax'`
-- [ ] Session expiration configured (reasonable max-age)
-- [ ] Rate limiting on login endpoint (≤10 attempts per 15 minutes)
-- [ ] Password reset tokens: time-limited (≤1 hour), single-use
-- [ ] Account lockout after repeated failures (optional, with notification)
-- [ ] MFA supported for sensitive operations (optional but recommended)
+- [ ] 密码使用 bcrypt（≥12 轮）、scrypt 或 argon2 进行哈希
+- [ ] Session cookies：`httpOnly`、`secure`、`sameSite: 'lax'`
+- [ ] 已配置 session 过期时间（合理的 max-age）
+- [ ] 登录端点设置 rate limiting（每 15 分钟 ≤10 次尝试）
+- [ ] 密码重置 tokens：有时限（≤1 小时）、一次性使用
+- [ ] 多次失败后锁定账号（可选，并附带通知）
+- [ ] 敏感操作支持 MFA（可选但推荐）
 
 ## Authorization
 
-- [ ] Every protected endpoint checks authentication
-- [ ] Every resource access checks ownership/role (prevents IDOR)
-- [ ] Admin endpoints require admin role verification
-- [ ] API keys scoped to minimum necessary permissions
-- [ ] JWT tokens validated (signature, expiration, issuer)
+- [ ] 每个受保护端点都检查 authentication
+- [ ] 每次资源访问都检查所有权/角色（防止 IDOR）
+- [ ] Admin 端点要求验证 admin role
+- [ ] API keys 限定为最小必要权限范围
+- [ ] JWT tokens 已验证（签名、过期时间、issuer）
 
-## Input Validation
+## 输入验证
 
-- [ ] All user input validated at system boundaries (API routes, form handlers)
-- [ ] Validation uses allowlists (not denylists)
-- [ ] String lengths constrained (min/max)
-- [ ] Numeric ranges validated
-- [ ] Email, URL, and date formats validated with proper libraries
-- [ ] File uploads: type restricted, size limited, content verified
-- [ ] SQL queries parameterized (no string concatenation)
-- [ ] HTML output encoded (use framework auto-escaping)
-- [ ] URLs validated before redirect (prevent open redirect)
+- [ ] 所有用户输入都在系统边界处验证（API routes、form handlers）
+- [ ] 验证使用 allowlists（而不是 denylists）
+- [ ] 字符串长度有限制（min/max）
+- [ ] 数值范围已验证
+- [ ] Email、URL 和日期格式使用合适的库验证
+- [ ] 文件上传：限制类型、限制大小、验证内容
+- [ ] SQL 查询参数化（不使用字符串拼接）
+- [ ] HTML 输出已编码（使用框架自动 escaping）
+- [ ] redirect 前验证 URLs（防止 open redirect）
 
-## Security Headers
+## 安全响应头
 
 ```
 Content-Security-Policy: default-src 'self'; script-src 'self'
@@ -63,7 +63,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: camera=(), microphone=(), geolocation=()
 ```
 
-## CORS Configuration
+## CORS 配置
 
 ```typescript
 // Restrictive (recommended)
@@ -78,15 +78,15 @@ cors({
 cors({ origin: '*' })  // Allows any origin
 ```
 
-## Data Protection
+## 数据保护
 
-- [ ] Sensitive fields excluded from API responses (`passwordHash`, `resetToken`, etc.)
-- [ ] Sensitive data not logged (passwords, tokens, full CC numbers)
-- [ ] PII encrypted at rest (if required by regulation)
-- [ ] HTTPS for all external communication
-- [ ] Database backups encrypted
+- [ ] API 响应排除敏感字段（`passwordHash`、`resetToken` 等）
+- [ ] 不记录敏感数据日志（密码、tokens、完整信用卡号）
+- [ ] PII 静态加密（如法规要求）
+- [ ] 所有外部通信使用 HTTPS
+- [ ] 数据库备份已加密
 
-## Dependency Security
+## 依赖安全
 
 ```bash
 # Audit dependencies
@@ -102,7 +102,7 @@ npm audit --audit-level=critical
 npx npm-check-updates
 ```
 
-## Error Handling
+## 错误处理
 
 ```typescript
 // Production: generic error, no internals
@@ -118,17 +118,17 @@ res.status(500).json({
 });
 ```
 
-## OWASP Top 10 Quick Reference
+## OWASP Top 10 快速参考
 
-| # | Vulnerability | Prevention |
+| # | 漏洞 | 预防措施 |
 |---|---|---|
-| 1 | Broken Access Control | Auth checks on every endpoint, ownership verification |
-| 2 | Cryptographic Failures | HTTPS, strong hashing, no secrets in code |
-| 3 | Injection | Parameterized queries, input validation |
-| 4 | Insecure Design | Threat modeling, spec-driven development |
-| 5 | Security Misconfiguration | Security headers, minimal permissions, audit deps |
-| 6 | Vulnerable Components | `npm audit`, keep deps updated, minimal deps |
-| 7 | Auth Failures | Strong passwords, rate limiting, session management |
-| 8 | Data Integrity Failures | Verify updates/dependencies, signed artifacts |
-| 9 | Logging Failures | Log security events, don't log secrets |
-| 10 | SSRF | Validate/allowlist URLs, restrict outbound requests |
+| 1 | Broken Access Control | 每个端点进行 auth 检查，验证所有权 |
+| 2 | Cryptographic Failures | HTTPS、强哈希、代码中无 secrets |
+| 3 | Injection | 参数化查询、输入验证 |
+| 4 | Insecure Design | 威胁建模、spec-driven development |
+| 5 | Security Misconfiguration | 安全响应头、最小权限、审计依赖 |
+| 6 | Vulnerable Components | `npm audit`、保持依赖更新、最小化依赖 |
+| 7 | Auth Failures | 强密码、rate limiting、session management |
+| 8 | Data Integrity Failures | 验证更新/依赖、签名 artifacts |
+| 9 | Logging Failures | 记录安全事件，不记录 secrets |
+| 10 | SSRF | 验证/allowlist URLs，限制出站请求 |
