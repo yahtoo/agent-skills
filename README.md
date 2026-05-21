@@ -108,7 +108,14 @@ Use agent definitions from `agents/` as Copilot personas and skill content in `.
 </details>
 
 <details>
-<summary><b>Codex / Other Agents</b></summary>
+<summary><b>Codex</b></summary>
+
+Use repository skills from `.agents/skills`, user-level skills from `$HOME/.agents/skills`, and global guidance from `~/.codex/AGENTS.md`. See [docs/codex-setup.md](docs/codex-setup.md).
+
+</details>
+
+<details>
+<summary><b>Other Agents</b></summary>
 
 Skills are plain Markdown - they work with any agent that accepts system prompts or instruction files. See [docs/getting-started.md](docs/getting-started.md).
 
@@ -118,15 +125,21 @@ Skills are plain Markdown - they work with any agent that accepts system prompts
 
 ---
 
-## All 23 Skills
+## All 24 Skills
 
-The commands above are entry points. The pack includes 23 skills total — 22 lifecycle skills plus the `using-agent-skills` meta-skill. Each skill is a structured workflow with steps, verification gates, and anti-rationalization tables. You can also reference any skill directly.
+The commands above are entry points. The pack includes 24 skills total — 22 lifecycle skills, the `using-agent-skills` meta-skill, and the `multi-agent-orchestration` coordination skill. Each skill is a structured workflow with steps, verification gates, and anti-rationalization tables. You can also reference any skill directly.
 
 ### Meta - Discover which skill applies
 
 | Skill | What It Does | Use When |
 |-------|-------------|----------|
 | [using-agent-skills](skills/using-agent-skills/SKILL.md) | Maps incoming work to the right skill workflow and defines shared operating rules | Starting a session or deciding which skill applies |
+
+### Orchestration - Coordinate multiple roles
+
+| Skill | What It Does | Use When |
+|-------|-------------|----------|
+| [multi-agent-orchestration](skills/multi-agent-orchestration/SKILL.md) | Coordinates requirements, architecture, implementation, testing, review, security, and release roles without creating a router persona | A feature, bugfix, or ship flow needs explicit role handoffs or independent review fan-out |
 
 ### Define - Clarify what to build
 
@@ -184,13 +197,17 @@ The commands above are entry points. The pack includes 23 skills total — 22 li
 
 ## Agent Personas
 
-Pre-configured specialist personas for targeted reviews:
+Pre-configured specialist personas for targeted reviews and multi-role workflows:
 
 | Agent | Role | Perspective |
 |-------|------|-------------|
+| [requirements-analyst](agents/requirements-analyst.md) | Requirements Analyst | Goals, constraints, non-goals, and acceptance criteria |
+| [software-architect](agents/software-architect.md) | Software Architect | Module boundaries, contracts, data flow, compatibility, and risks |
+| [implementation-engineer](agents/implementation-engineer.md) | Implementation Engineer | Single-writer implementation in thin verified slices |
 | [code-reviewer](agents/code-reviewer.md) | Senior Staff Engineer | Five-axis code review with "would a staff engineer approve this?" standard |
 | [test-engineer](agents/test-engineer.md) | QA Specialist | Test strategy, coverage analysis, and the Prove-It pattern |
 | [security-auditor](agents/security-auditor.md) | Security Engineer | Vulnerability detection, threat modeling, OWASP assessment |
+| [release-manager](agents/release-manager.md) | Release Manager | Ship/no-ship decision, rollback plan, and release readiness |
 
 ---
 
@@ -204,6 +221,7 @@ Quick-reference material that skills pull in when needed:
 | [security-checklist.md](references/security-checklist.md) | Pre-commit checks, auth, input validation, headers, CORS, OWASP Top 10 |
 | [performance-checklist.md](references/performance-checklist.md) | Core Web Vitals targets, frontend/backend checklists, measurement commands |
 | [accessibility-checklist.md](references/accessibility-checklist.md) | Keyboard nav, screen readers, visual design, ARIA, testing tools |
+| [orchestration-patterns.md](references/orchestration-patterns.md) | Valid persona composition patterns, fan-out rules, and anti-patterns |
 
 ---
 
@@ -242,7 +260,7 @@ Every skill follows a consistent anatomy:
 
 ```
 agent-skills/
-├── skills/                            # 23 skills (22 lifecycle + 1 meta)
+├── skills/                            # 24 skills (22 lifecycle + meta + orchestration)
 │   ├── interview-me/                  #   Define
 │   ├── idea-refine/                   #   Define
 │   ├── spec-driven-development/       #   Define
@@ -265,11 +283,13 @@ agent-skills/
 │   ├── deprecation-and-migration/     #   Ship
 │   ├── documentation-and-adrs/        #   Ship
 │   ├── shipping-and-launch/           #   Ship
-│   └── using-agent-skills/            #   Meta: how to use this pack
-├── agents/                            # 3 specialist personas
-├── references/                        # 4 supplementary checklists
+│   ├── using-agent-skills/            #   Meta: how to use this pack
+│   └── multi-agent-orchestration/      #   Role handoffs and fan-out rules
+├── agents/                            # 7 specialist personas
+├── references/                        # 5 supplementary references and checklists
 ├── hooks/                             # Session lifecycle hooks
 ├── .claude/commands/                  # 7 slash commands (Claude Code)
+├── .agents/skills/                    # Codex command adapter skills
 ├── .gemini/commands/                  # 7 slash commands (Gemini CLI)
 └── docs/                              # Setup guides per tool
 ```

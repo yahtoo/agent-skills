@@ -21,16 +21,26 @@ For more details, refer [Creating agent skills for GitHub Copilot](https://docs.
 Copilot supports specialized agent personas. Use the agent-skills agents:
 
 ```bash
-# Copy agent definitions
+# Copy review agent definitions
 cp /path/to/agent-skills/agents/code-reviewer.md .github/agents/code-reviewer.md
 cp /path/to/agent-skills/agents/test-engineer.md .github/agents/test-engineer.md
 cp /path/to/agent-skills/agents/security-auditor.md .github/agents/security-auditor.md
+
+# Optional: copy multi-role workflow personas
+cp /path/to/agent-skills/agents/requirements-analyst.md .github/agents/requirements-analyst.md
+cp /path/to/agent-skills/agents/software-architect.md .github/agents/software-architect.md
+cp /path/to/agent-skills/agents/implementation-engineer.md .github/agents/implementation-engineer.md
+cp /path/to/agent-skills/agents/release-manager.md .github/agents/release-manager.md
 ```
 
 Invoke agents in Copilot Chat:
+- `@requirements-analyst Clarify acceptance criteria for this feature`
+- `@software-architect Review the proposed module boundary`
+- `@implementation-engineer Implement the approved slice`
 - `@code-reviewer Review this PR`
 - `@test-engineer Analyze test coverage for this module`
 - `@security-auditor Check this endpoint for vulnerabilities`
+- `@release-manager Prepare a ship/no-ship checklist`
 
 ### Custom Instructions (User Level)
 
@@ -77,6 +87,6 @@ Use the agents for targeted review workflows in Copilot Chat.
 ## Usage Tips
 
 1. **Keep instructions concise** — Copilot instructions work best when focused. Summarize the key rules rather than including full skill files.
-2. **Use agents for review** — The code-reviewer, test-engineer, and security-auditor agents are designed for Copilot's agent model.
+2. **Use agents for role-specific work** — The review personas cover PR readiness; the requirements, architecture, implementation, and release personas support multi-role workflows.
 3. **Reference in chat** — When working on a specific phase, paste the relevant skill content into Copilot Chat for context.
 4. **Combine with PR reviews** — Set up Copilot to review PRs using the code-reviewer agent persona.

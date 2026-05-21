@@ -20,6 +20,9 @@ jobs:
       - name: Validate all skills
         run: node scripts/validate-skills.js
 
+      - name: Validate agent personas
+        run: node scripts/validate-agents.js
+
   validate:
     name: Validate plugin structure
     needs: validate-skills

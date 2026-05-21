@@ -1,6 +1,6 @@
 # Getting Started with agent-skills
 
-agent-skills works with any AI coding agent that accepts Markdown instructions. This guide covers the universal approach. For tool-specific setup, see the dedicated guides.
+agent-skills works with any AI coding agent that accepts Markdown instructions. This guide covers the universal approach. For tool-specific setup, see the dedicated guides. Codex users should start with [codex-setup.md](codex-setup.md).
 
 ## How Skills Work
 
@@ -93,11 +93,15 @@ The `agents/` directory contains pre-configured agent personas:
 
 | Agent | Purpose |
 |-------|---------|
+| `requirements-analyst.md` | Requirements, non-goals, constraints, and acceptance criteria |
+| `software-architect.md` | Boundaries, contracts, data flow, compatibility, and risks |
+| `implementation-engineer.md` | Single-writer implementation in verified slices |
 | `code-reviewer.md` | Five-axis code review |
 | `test-engineer.md` | Test strategy and writing |
 | `security-auditor.md` | Vulnerability detection |
+| `release-manager.md` | Ship/no-ship decision and rollback planning |
 
-Load an agent definition when you need specialized review. For example, ask your coding agent to "review this change using the code-reviewer agent persona" and provide the agent definition.
+Load an agent definition when you need specialized role behavior. For example, ask your coding agent to "review this change using the code-reviewer agent persona" and provide the agent definition.
 
 ## Using Commands
 

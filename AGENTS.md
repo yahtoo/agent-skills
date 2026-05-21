@@ -4,7 +4,27 @@
 
 ## Repository Overview（仓库概览）
 
-本仓库是一组面向高级软件工程师的 Claude.ai 与 Claude Code skills。Skill 是打包好的说明与脚本，用来扩展 Claude 和其他编码代理的能力。
+本仓库是一组面向高级软件工程师的 Claude.ai、Claude Code、Codex 与其他 coding agents 的 skills。Skill 是打包好的说明与脚本，用来扩展编码代理的能力。
+
+## Codex Integration（Codex 集成）
+
+Codex 使用 `AGENTS.md` 作为指令层，使用 `.agents/skills` 或用户级 skills 目录作为 workflow 发现层。本仓库对 Codex 的默认策略是：
+
+- `AGENTS.md` / command skill 负责 orchestration，不创建 `agents/orchestrator.md`
+- `skills/<name>/SKILL.md` 负责 workflow 方法
+- `agents/<role>.md` 负责 portable persona prompt
+- `.agents/skills/source-command-*` 提供 Codex 可发现的命令入口 skills
+
+### Codex Intent Mapping（Codex 意图映射）
+
+- Feature / new functionality -> `multi-agent-orchestration` + `spec-driven-development` + `planning-and-task-breakdown`
+- Bug / failure / unexpected behavior -> `source-command-bugfix` 或 `debugging-and-error-recovery`
+- Build / implementation -> `source-command-build` 或 `incremental-implementation` + `test-driven-development`
+- Release / ship -> `source-command-ship`，对独立审查使用 parallel fan-out
+
+### Multi-Role Rule（多角色规则）
+
+多角色开发遵循 **single writer, many reviewers**：实现阶段只允许一个 implementation role 写代码；requirements、architecture、test、security、review、release roles 默认只读并输出结构化交接物。并行只用于无共享可变状态、无顺序依赖的独立审查。
 
 ## OpenCode Integration（OpenCode 集成）
 
@@ -75,7 +95,7 @@ OpenCode 不支持 `/spec` 或 `/plan` 这类 slash commands。
 
 组合规则：**用户（或 slash command）是编排者。Personas 不调用其他 personas。** Persona 可以调用 skills。
 
-本仓库认可的唯一多 persona 编排模式是 **parallel fan-out with a merge step**，即 `/ship` 使用的模式：并行运行 `code-reviewer`、`security-auditor` 和 `test-engineer`，再综合它们的报告。不要构建一个由 persona 决定调用哪个 persona 的 “router” persona；这是 slash commands 和 intent mapping 的职责。
+本仓库认可两类多 persona 编排：主 agent / command skill 驱动的顺序交接（requirements → architecture → plan → implementation → review），以及 `/ship` 使用的 **parallel fan-out with a merge step**（并行运行 `code-reviewer`、`security-auditor` 和 `test-engineer`，再综合报告）。不要构建一个由 persona 决定调用哪个 persona 的 “router” persona；这是 main agent、slash commands、Codex command skills 和 intent mapping 的职责。
 
 参见 [agents/README.md](agents/README.md) 的决策矩阵，以及 [references/orchestration-patterns.md](references/orchestration-patterns.md) 的完整模式目录。
 

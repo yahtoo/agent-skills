@@ -12,7 +12,11 @@
   "skills": "./skills",
   "agents": [
     "./agents/code-reviewer.md",
+    "./agents/implementation-engineer.md",
+    "./agents/release-manager.md",
+    "./agents/requirements-analyst.md",
     "./agents/security-auditor.md",
+    "./agents/software-architect.md",
     "./agents/test-engineer.md"
   ]
 }
